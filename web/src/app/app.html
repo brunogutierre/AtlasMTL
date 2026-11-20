@@ -3,6 +3,10 @@
     <h1>AtlasMTL</h1>
     <p>{{ i18n.t().tagline }}</p>
   </div>
+  <nav class="pages" [attr.aria-label]="i18n.t().nav.label">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">{{ i18n.t().nav.ask }}</a>
+    <a routerLink="/stats" routerLinkActive="active" ariaCurrentWhenActive="page">{{ i18n.t().nav.stats }}</a>
+  </nav>
   <nav class="settings">
     <div role="group" [attr.aria-label]="i18n.t().theme">
       @for (mode of modes; track mode) {
@@ -31,19 +35,8 @@
   </nav>
 </header>
 
-<main class="layout">
-  <section tes-card class="chat" aria-labelledby="chat-title">
-    <h2 id="chat-title">{{ i18n.t().chat.title }}</h2>
-    <app-chat-panel />
-  </section>
-  <section class="map" role="region" [attr.aria-label]="i18n.t().map.label">
-    <app-map-view
-      [places]="session.places()"
-      [boroughs]="boroughs.hasValue() ? boroughs.value() : []"
-      [selected]="session.selected()"
-      (selectedChange)="session.selected.set($event)"
-    />
-  </section>
+<main>
+  <router-outlet />
 </main>
 
 <footer class="attribution">

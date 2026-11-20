@@ -1,0 +1,81 @@
+.page {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+.intro {
+  color: var(--tes-color-text-muted);
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+}
+
+h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.days li {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 2.5rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bar {
+  height: 0.6rem;
+  background: var(--tes-color-surface-sunken);
+  border-radius: var(--tes-radius-full);
+  overflow: hidden;
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  background: var(--tes-color-primary);
+}
+
+.tools li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.label,
+.count {
+  font-variant-numeric: tabular-nums;
+  color: var(--tes-color-text-muted);
+}
+
+.count {
+  text-align: end;
+}
+
+@media (max-width: 48rem) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+}

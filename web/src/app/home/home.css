@@ -1,0 +1,36 @@
+:host {
+  display: grid;
+  min-height: 0;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(18rem, 26rem) 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: 0;
+}
+
+.chat {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+}
+
+.chat h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.map {
+  min-height: 24rem;
+  overflow: hidden;
+  border-radius: var(--tes-radius-md);
+  border: 1px solid var(--tes-color-border);
+}
+
+@media (max-width: 48rem) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
