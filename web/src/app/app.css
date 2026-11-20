@@ -32,32 +32,6 @@
   align-items: center;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: minmax(18rem, 26rem) 1fr;
-  gap: 1rem;
-  padding: 1rem;
-  min-height: 0;
-}
-
-.chat {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: 0;
-}
-
-.chat h2 {
-  margin-top: 0;
-  font-size: 1.1rem;
-}
-
-.map {
-  min-height: 24rem;
-  overflow: hidden;
-  border-radius: var(--tes-radius-md);
-  border: 1px solid var(--tes-color-border);
-}
-
 .attribution {
   padding: 0.5rem 1rem;
   font-size: 0.8rem;
@@ -65,13 +39,35 @@
   border-top: 1px solid var(--tes-color-border);
 }
 
-@media (max-width: 48rem) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
 
 .settings [aria-pressed='true'] {
   background: var(--tes-color-surface-sunken);
   font-weight: 600;
+}
+
+main {
+  min-height: 0;
+  display: grid;
+}
+
+/* The outlet is an empty marker before the routed page; as a grid item it would take a row. */
+main > router-outlet {
+  display: none;
+}
+
+.pages {
+  display: flex;
+  gap: 1rem;
+}
+
+.pages a {
+  color: var(--tes-color-text-muted);
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.pages a.active {
+  color: var(--tes-color-text);
+  border-bottom-color: var(--tes-color-primary);
 }
