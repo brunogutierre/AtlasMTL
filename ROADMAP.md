@@ -37,15 +37,6 @@ AtlasMTL is a natural-language geospatial assistant over Montreal open data. A v
 
 See [ADR 0004](docs/adr/0004-one-feature-table-explicit-sql.md).
 
-```
-dataset(id, source_url, license, fetched_at, checksum)
-borough(id, name, kind, geom)   -- kind: arrondissement | ville liée
-feature(id, dataset_id, category, subcategory, name_fr, name_en, props jsonb, geom geometry(Geometry, 4326))
-  -- GiST index on (geom::geography)
-address(id, number_from, number_to, street, orientation, borough_id, geom)   -- pg_trgm index on street
-query_log(id, asked_at, ip_hash, question, tools jsonb, input_tokens, output_tokens, cost_usd, latency_ms)
-```
-
 ### Tools (draft)
 
 | Tool | Arguments |

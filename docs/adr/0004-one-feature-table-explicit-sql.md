@@ -9,16 +9,16 @@ The tools ask the same spatial questions of every category: within a borough, wi
 ## Decision
 
 ```
-dataset(id, source_url, license, fetched_at, checksum)
-borough(id, name, kind, geom)
-feature(id, dataset_id, category, subcategory, name_fr, name_en, props jsonb, geom geometry(Geometry, 4326))
-address(id, number_from, number_to, street, orientation, borough_id, geom)
-query_log(id, asked_at, ip_hash, question, tools jsonb, input_tokens, output_tokens, cost_usd, latency_ms)
+dataset(id, title, publisher, source_url, license, fetched_at, checksum)
+borough(id, name, kind, geom MultiPolygon)
+feature(id, dataset_id, source_id, category, subcategory, name_fr, name_en, props jsonb, geom Geometry)
+address(id, number_from, number_to, street_type, street_link, street_name, orientation, street_key, geom Point)
+query_log(...)   -- added with observability (PR 18)
 ```
 
 - Every source is normalized into `feature`, and source-specific fields stay in `props`.
 - Distances use `geography` (`ST_DWithin(a.geom::geography, b.geom::geography, :meters)`), backed by a GiST index on `(geom::geography)`.
-- Access goes through `JdbcClient` with SQL written out in the repository. Migrations use Flyway.
+- Access goes through `JdbcClient` with SQL written out in the repository. Migrations use Flyway and live in the `db` module ([V1__schema.sql](../../db/src/main/resources/db/migration/V1__schema.sql)).
 
 ## Consequences
 

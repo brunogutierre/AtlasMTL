@@ -2,6 +2,7 @@ package io.github.brunogutierre.atlasmtl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.brunogutierre.atlasmtl.db.Postgis;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,7 +11,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 class AtlasApplicationTest {
@@ -20,17 +20,23 @@ class AtlasApplicationTest {
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgis() {
-      return new PostgreSQLContainer(
-          DockerImageName.parse("postgis/postgis:17-3.5").asCompatibleSubstituteFor("postgres"));
+      return Postgis.container();
     }
   }
 
   @Autowired JdbcClient jdbc;
 
   @Test
-  void startsAgainstPostgis() {
+  void migratesTheSchemaOnStartup() {
     String version = jdbc.sql("select postgis_lib_version()").query(String.class).single();
+    long tables =
+        jdbc.sql(
+                "select count(*) from information_schema.tables where table_name in"
+                    + " ('dataset', 'borough', 'feature', 'address')")
+            .query(Long.class)
+            .single();
 
     assertThat(version).startsWith("3.5");
+    assertThat(tables).isEqualTo(4);
   }
 }
