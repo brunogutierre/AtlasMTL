@@ -8,6 +8,17 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/atlas}
     username: ${DATABASE_USER:atlas}
     password: ${DATABASE_PASSWORD:atlas}
+  ai:
+    model:
+      chat: anthropic
+    anthropic:
+      # A placeholder lets the app start without a key; answers then fail with an error event.
+      api-key: ${ANTHROPIC_API_KEY:not-set}
+      chat:
+        options:
+          model: ${ATLAS_MODEL:claude-haiku-5-5}
+          max-tokens: 1024
+          temperature: 0.2
 
 management:
   endpoints:
