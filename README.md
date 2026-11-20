@@ -1,47 +1,99 @@
 # AtlasMTL
 
-Ask questions about Montreal in plain language and see the answer on a map. *"Schools within 1 km of a hospital"*, *"Which borough has the most parks per km²?"*: an AI agent picks typed geospatial tools, runs safe PostGIS queries over the city's open data, streams its answer and draws the results.
+[![CI](https://github.com/brunogutierre/AtlasMTL/actions/workflows/ci.yml/badge.svg)](https://github.com/brunogutierre/AtlasMTL/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-> **Status: planning.** No code yet. The plan is in [ROADMAP.md](ROADMAP.md), the data sources were checked in the [data spike](docs/data-spike.md), and the decisions are recorded as [ADRs](docs/adr/).
+Ask questions about Montréal in plain language and see the answer on a map. *"Schools within 1 km of a hospital"*, *"Which borough has the most parks per km²?"*, *"Parks within 500 m of 1000 rue Sherbrooke Ouest"*: an AI agent picks typed geospatial tools, runs safe PostGIS queries over the city's open data, streams its answer and draws the places it found.
 
-## Goal
+> **Status:** feature-complete and tested end to end (with a recorded Anthropic stream and a stubbed browser). The public demo goes live once hosting and a model key are set up. The plan and what's left are in [ROADMAP.md](ROADMAP.md).
 
-Show an end-to-end LLM feature built the way production teams need it:
+## What it shows
 
-- **The LLM never writes SQL.** It calls typed, range-checked tools; every query is parameterized.
-- **Streaming everywhere.** Tokens, tool calls and map features arrive as typed server-sent events.
-- **Measured, not guessed.** An evaluation suite of golden questions, token and latency metrics, and per-visitor cost limits on the public demo.
+An LLM feature built the way production teams need it:
 
-## Stack (planned)
+- **The LLM never writes SQL.** It can only call six typed, range-checked tools; each one runs a fixed, parameterized query ([ADR 0001](docs/adr/0001-typed-tools-no-text-to-sql.md)).
+- **Every step is visible.** Text tokens, tool calls, tool results and map features stream as typed server-sent events, so the visitor sees *how* each answer was found ([ADR 0003](docs/adr/0003-sse-agent-events.md)).
+- **Bounded cost.** Our own tool loop caps tool calls (6) and paid model calls (8) per answer ([ADR 0009](docs/adr/0009-own-tool-loop.md)). Repeated questions replay from a cache at zero cost. Visitors are rate-limited, and both visitors and the whole demo have daily budgets.
+- **Measured, not guessed.** Golden-question evals against the real model, a per-question usage log, and a public [/stats](#public-statistics) page.
+- **Real data, kept fresh.** A weekly job pulls five open datasets (346k address points included) and replaces them atomically ([ADR 0005](docs/adr/0005-ingest-as-ci-job.md)). A local geocoder resolves addresses without any external service ([ADR 0006](docs/adr/0006-local-geocoder.md)).
+- **One contract, two languages.** The Angular client and the event union are generated from the Java code by [RecordBridge](https://github.com/brunogutierre/RecordBridge), and CI fails if they drift.
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI[Angular 22 + Tessera<br/>chat · trace · map]
+  end
+  subgraph Server[Spring Boot 4]
+    API[POST /api/ask<br/>SSE] --> LIM[Rate limit<br/>+ budgets]
+    LIM --> CACHE{Answer<br/>cache}
+    CACHE -- miss --> LOOP[Tool loop<br/>≤ 6 tool calls]
+    LOOP <--> LLM[(Claude<br/>via Spring AI)]
+    LOOP --> TOOLS[6 typed tools]
+    TOOLS --> SQL[Fixed SQL<br/>JdbcClient]
+  end
+  SQL --> DB[(PostgreSQL<br/>+ PostGIS)]
+  INGEST[Weekly ingest job<br/>GitHub Actions] --> DB
+  PORTALS[donnees.montreal.ca<br/>Données Québec] --> INGEST
+  UI -- question --> API
+  API -- Token · ToolCall · ToolResult · Features · Usage · Done --> UI
+```
+
+### The tools
+
+| Tool | What it does |
+|---|---|
+| `describe_categories` | Lists the kinds of places and how many exist |
+| `find_features` | Places of a category, optionally in a borough, near a point, or above a minimum area |
+| `within_distance` | Places of one category within N meters of another category, each with its nearest one |
+| `count_by_borough` | Count and density per km² in each borough and linked city |
+| `geocode` | A Montréal street address to coordinates (French or English, number ranges, typos) |
+| `get_borough` | A borough or linked city by name, ignoring case and accents |
+
+The model sees a short summary of each result. The full GeoJSON goes to the map only.
+
+## Stack
 
 | Area | Choice |
 |---|---|
-| Backend | Java 25, Spring Boot 4 (Spring MVC + virtual threads) |
-| AI | Spring AI 2.0 with Claude (Anthropic) and typed `@Tool`s, run by our own bounded tool loop |
-| Data | PostgreSQL + PostGIS, Flyway, `JdbcClient` with explicit SQL |
+| Backend | Java 25, Spring Boot 4.1 (Spring MVC on virtual threads) |
+| AI | Spring AI 2.0 with Claude (Anthropic), typed `@Tool`s, our own bounded tool loop |
+| Data | PostgreSQL 17 + PostGIS 3.5, Flyway, `JdbcClient` with explicit SQL, `pg_trgm` |
 | Frontend | Angular 22 (signals, zoneless), [Tessera](https://github.com/brunogutierre/Tessera) design system, typed EN/FR messages |
-| Map | MapLibre GL JS + OpenFreeMap tiles |
-| API contract | [RecordBridge](https://github.com/brunogutierre/RecordBridge) generates the Angular client and event types |
-| Tests | JUnit 6, Testcontainers PostGIS, stub `ChatModel`, eval suite, Vitest, Playwright + axe |
-| Deploy | One container on Render, Neon (PostGIS) |
-
-## Architecture (planned)
-
-```
-Angular (map + chat) ──POST /api/ask (SSE)──► Spring Boot
-       ▲                                          │ own tool loop (≤ 6 tool calls)
-       │ Token | ToolCall | Features | Done ...   ▼
-       └──────────────────────────────── Tools (find, within_distance, count_by_borough, geocode)
-                                                  │ parameterized SQL
-                                                  ▼
-                                    PostGIS ◄── weekly ingest (GitHub Actions)
-                                                  ▲
-                                   donnees.montreal.ca / Données Québec
-```
+| Map | MapLibre GL JS + OpenFreeMap tiles, colored by Tessera tokens in light and dark |
+| API contract | [RecordBridge](https://github.com/brunogutierre/RecordBridge) Gradle plugin |
+| Cost controls | Bucket4j rate limits, budgets from the usage log, answer cache |
+| Tests | JUnit 6, Testcontainers PostGIS, scripted and recorded-stream model tests, golden-question evals, Vitest, Playwright + axe |
+| Deploy | One container (Render) + managed PostGIS (Neon) |
 
 ## Data sources
 
-Five CC-BY 4.0 datasets from [donnees.montreal.ca](https://donnees.montreal.ca) (parks, boroughs, address points) and [Données Québec](https://www.donneesquebec.ca) (MSSS health facilities, MEQ schools). The [data spike](docs/data-spike.md) lists each source, its format, update cadence and caveats. The app credits every publisher.
+All five datasets are published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); the app credits each publisher.
+
+| Dataset | Publisher |
+|---|---|
+| [Parks and green spaces](https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics) | Ville de Montréal |
+| [Administrative boundaries](https://donnees.montreal.ca/dataset/limites-administratives-agglomeration) | Ville de Montréal |
+| [Address points](https://donnees.montreal.ca/dataset/adresses-ponctuelles) | Ville de Montréal |
+| [Health and social services installations](https://www.donneesquebec.ca/recherche/dataset/fichiers-cartographiques-m02-des-installations-et-etablissements) | Ministère de la Santé et des Services sociaux |
+| [School locations](https://www.donneesquebec.ca/recherche/dataset/localisation-des-etablissements-d-enseignement-du-reseau-scolaire-au-quebec) | Ministère de l'Éducation |
+
+The [data spike](docs/data-spike.md) documents each source's format, update cadence and caveats. Map tiles © OpenStreetMap contributors, served by OpenFreeMap.
+
+## Public statistics
+
+`/stats` shows aggregate numbers over completed answers, never a question or a visitor:
+- questions answered;
+- the share replayed from the cache;
+- the average model cost;
+- median and p95 answer time;
+- tool calls per answer and the most used tools;
+- a 14-day series.
+
+## Decisions
+
+The architecture decisions, with their context, consequences and rejected alternatives, are in [docs/adr](docs/adr/).
 
 ## How to run and test
 
