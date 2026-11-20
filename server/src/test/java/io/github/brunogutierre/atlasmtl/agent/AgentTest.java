@@ -10,28 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest
-@Import({TestDatabase.class, AgentTest.Model.class})
+@Import({TestDatabase.class, ScriptedModelConfig.class})
 @Sql(scripts = "/geo-fixture.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @Sql(
     statements = "delete from feature; delete from borough; delete from dataset",
     executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 class AgentTest {
-
-  @TestConfiguration(proxyBeanMethods = false)
-  static class Model {
-    @Bean
-    @Primary
-    ScriptedChatModel scriptedChatModel() {
-      return new ScriptedChatModel();
-    }
-  }
 
   @Autowired Agent agent;
   @Autowired ScriptedChatModel model;
