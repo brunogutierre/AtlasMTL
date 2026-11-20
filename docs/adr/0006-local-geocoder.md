@@ -10,9 +10,10 @@ Questions like "what's near 1000 rue Sherbrooke Ouest?" need an address turned i
 
 - The geocoder uses the agglomeration's [address points](https://donnees.montreal.ca/dataset/adresses-ponctuelles): 345,979 points, many covering a number range.
 - Steps:
-  1. parse the number, street type, street name and orientation (`Ouest`/`O`/`West`);
-  2. match the street with a `pg_trgm` similarity index on a normalized street name, without accents or case;
-  3. pick the point whose range contains the number on the same side (parity), or else the nearest number on that street.
+  1. parse the number, street type, street name, orientation (`Ouest`/`O`/`West`) and an optional locality after a comma, in French or English;
+  2. match the street with a `pg_trgm` similarity index on a normalized street name (no accents or case), with and without its link words, because official names sometimes keep them (*boulevard De Maisonneuve*);
+  3. break ties by street type, then orientation, then the locality's borough or linked city;
+  4. pick the point whose range contains the number on the same side (parity), or else the nearest number on that street.
 - The result includes the matched address, so the answer shows what was actually found.
 
 ## Consequences
