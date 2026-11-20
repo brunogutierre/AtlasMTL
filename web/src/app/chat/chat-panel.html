@@ -28,7 +28,7 @@
       }
       @if (exchange.status === 'error') {
         <tes-alert tone="danger" live="assertive">
-          {{ exchange.error ?? i18n.t().chat.failed }}
+          {{ (exchange.errorCode && i18n.t().limits[exchange.errorCode]) || exchange.error || i18n.t().chat.failed }}
         </tes-alert>
       }
     </li>

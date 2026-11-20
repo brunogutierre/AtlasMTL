@@ -9,6 +9,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.springframework.ai:spring-ai-starter-model-anthropic")
+    implementation(libs.bucket4j)
+    implementation("com.github.ben-manes.caffeine:caffeine")
     runtimeOnly(project(":db"))
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")

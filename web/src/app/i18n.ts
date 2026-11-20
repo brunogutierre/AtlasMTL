@@ -60,6 +60,12 @@ const en = {
       get_borough: 'Looked up a borough',
     } as Record<string, string>,
   },
+  limits: {
+    rate_limited: 'That was quick! Please wait a few seconds before asking again.',
+    visitor_budget: 'You have reached today’s question limit. Come back tomorrow.',
+    global_budget:
+      'Today’s budget for new answers is spent. The example questions still work; new ones will be back tomorrow.',
+  } as Record<string, string>,
   results: {
     heading: (count: number) => `On the map (${count})`,
     show: 'Show on the map',
@@ -129,6 +135,12 @@ const fr: Messages = {
       geocode: 'Localisation d’une adresse',
       get_borough: 'Recherche d’un arrondissement',
     },
+  },
+  limits: {
+    rate_limited: 'C’était rapide ! Attendez quelques secondes avant de reposer une question.',
+    visitor_budget: 'Vous avez atteint la limite de questions pour aujourd’hui. Revenez demain.',
+    global_budget:
+      'Le budget du jour pour les nouvelles réponses est épuisé. Les exemples fonctionnent encore ; les nouvelles questions reviennent demain.',
   },
   results: {
     heading: (count: number) => `Sur la carte (${count})`,

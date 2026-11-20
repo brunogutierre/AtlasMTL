@@ -49,4 +49,28 @@ public class QueryLog {
         .param("latency", entry.latencyMs())
         .update();
   }
+
+  /** Model tokens the visitor used since midnight UTC. */
+  public long tokensToday(String visitor) {
+    return jdbc.sql(
+            """
+            select coalesce(sum(input_tokens + output_tokens), 0) from query_log
+            where visitor = :visitor and asked_at >= date_trunc('day', now() at time zone 'utc')
+              at time zone 'utc'
+            """)
+        .param("visitor", visitor)
+        .query(Long.class)
+        .single();
+  }
+
+  /** Everyone's estimated model spend since midnight UTC. */
+  public BigDecimal costToday() {
+    return jdbc.sql(
+            """
+            select coalesce(sum(cost_usd), 0) from query_log
+            where asked_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc'
+            """)
+        .query(BigDecimal.class)
+        .single();
+  }
 }
