@@ -55,6 +55,7 @@ ANTHROPIC_API_KEY=… ./gradlew :server:bootRun   # API on http://localhost:8080
 cd web && npm ci
 npx ng serve                    # Angular dev server on http://localhost:4200
 npx ng test --watch=false       # Vitest
+npx playwright test             # end to end in Chromium, with axe; API and map tiles stubbed
 ```
 
 Ask a question from the command line (the answer streams as server-sent events):
