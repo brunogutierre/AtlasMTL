@@ -33,14 +33,16 @@ AtlasMTL is a natural-language geospatial assistant over Montreal open data. A v
 | Auth | None. The demo is public, and ingest runs only in CI | Nothing to protect, fewer moving parts | Bring-your-own API key (liability of handling other people's keys) |
 | Hosting | One container (Spring serves the Angular build) on Render Starter + Neon free tier (PostGIS) | No cold starts, ~US$7/month, Neon branches for CI | Render free (cold starts ruin the demo), Supabase free (pauses idle projects) |
 
-### Data model (draft)
+### Data model
+
+See [ADR 0004](docs/adr/0004-one-feature-table-explicit-sql.md).
 
 ```
 dataset(id, source_url, license, fetched_at, checksum)
-borough(id, name, geom)
+borough(id, name, kind, geom)   -- kind: arrondissement | ville liée
 feature(id, dataset_id, category, subcategory, name_fr, name_en, props jsonb, geom geometry(Geometry, 4326))
   -- GiST index on (geom::geography)
-address(id, text, geom)   -- pg_trgm index on text
+address(id, number_from, number_to, street, orientation, borough_id, geom)   -- pg_trgm index on street
 query_log(id, asked_at, ip_hash, question, tools jsonb, input_tokens, output_tokens, cost_usd, latency_ms)
 ```
 
@@ -78,7 +80,7 @@ query_log(id, asked_at, ip_hash, question, tools jsonb, input_tokens, output_tok
 ## 3. Step by step
 
 ### M0: Discovery
-0. **Data spike** (documented in PR 1). For each dataset, confirm the license (expected CC-BY 4.0, which requires attribution), CRS, update cadence, FR/EN fields and coordinates:
+0. ✅ **Data spike**, done 2026-11-20: see [docs/data-spike.md](docs/data-spike.md). For each dataset, confirm the license (expected CC-BY 4.0, which requires attribution), CRS, update cadence, FR/EN fields and coordinates:
    - parks
    - borough boundaries
    - point addresses (donnees.montreal.ca)
@@ -86,7 +88,7 @@ query_log(id, asked_at, ip_hash, question, tools jsonb, input_tokens, output_tok
    - **schools**: MEQ establishments on Données Québec; this is the riskiest source, so confirm its coordinates and the Montreal filter
 
    Check that "AtlasMTL" is free as a name.
-1. `docs`: data spike results and ADRs
+1. `docs`: data spike results and [ADRs](docs/adr/)
 2. `chore`: monorepo scaffold (Spring Boot 4, Angular 22, Compose with PostGIS, CI)
 
 ### M1: Data

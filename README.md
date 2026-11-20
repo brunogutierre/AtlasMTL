@@ -1,8 +1,8 @@
 # AtlasMTL
 
-Ask questions about Montreal in plain language and see the answer on a map. *"Schools within 1 km of a hospital"*, *"Which borough has the most parks per resident?"*: an AI agent picks typed geospatial tools, runs safe PostGIS queries over the city's open data, streams its answer and draws the results.
+Ask questions about Montreal in plain language and see the answer on a map. *"Schools within 1 km of a hospital"*, *"Which borough has the most parks per km²?"*: an AI agent picks typed geospatial tools, runs safe PostGIS queries over the city's open data, streams its answer and draws the results.
 
-> **Status: planning.** No code yet. The full plan, decisions and milestones are in [ROADMAP.md](ROADMAP.md).
+> **Status: planning.** No code yet. The plan is in [ROADMAP.md](ROADMAP.md), the data sources were checked in the [data spike](docs/data-spike.md), and the decisions are recorded as [ADRs](docs/adr/).
 
 ## Goal
 
@@ -41,7 +41,7 @@ Angular (map + chat) ──POST /api/ask (SSE)──► Spring Boot
 
 ## Data sources
 
-Montreal and Québec open data portals ([donnees.montreal.ca](https://donnees.montreal.ca), [Données Québec](https://www.donneesquebec.ca)). Licenses and attribution are listed per dataset in the app and in this README once ingestion lands.
+Five CC-BY 4.0 datasets from [donnees.montreal.ca](https://donnees.montreal.ca) (parks, boroughs, address points) and [Données Québec](https://www.donneesquebec.ca) (MSSS health facilities, MEQ schools). The [data spike](docs/data-spike.md) lists each source, its format, update cadence and caveats. The app credits every publisher.
 
 ## How to run and test
 
