@@ -1,0 +1,4 @@
+{"type":"FeatureCollection","features":[
+{"type":"Feature","properties":{"CODEID":10,"NOM":"LaSalle","CODEMAMH":"REM17","NUM":18,"ABREV":"LS","TYPE":"Arrondissement","COMMENT":null,"DATEMODIF":"2023-11-29"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-73.6,45.5],[-73.59,45.5],[-73.59,45.51],[-73.6,45.51],[-73.6,45.5]]]]}},
+{"type":"Feature","properties":{"CODEID":3,"NOM":"Dollard-des-Ormeaux","CODEMAMH":"66142","NUM":11,"ABREV":"DO","TYPE":"Ville liée","COMMENT":null,"DATEMODIF":"2023-11-29"},"geometry":{"type":"MultiPolygon","coordinates":[[[[-73.6,45.5],[-73.59,45.5],[-73.59,45.51],[-73.6,45.51],[-73.6,45.5]]]]}}
+]}
