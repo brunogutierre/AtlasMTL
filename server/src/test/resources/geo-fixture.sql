@@ -19,3 +19,8 @@ insert into feature (dataset_id, source_id, category, subcategory, name_fr, prop
    st_setsrid(st_makepoint(-73.585, 45.525), 4326)),
   ('test', 'p1', 'park', 'borough_park', 'Parc Carré', '{"area_ha": 1.2}',
    st_makeenvelope(-73.590, 45.511, -73.588, 45.513, 4326));
+
+-- A park mostly east of the Plateau: it touches the borough, but its point on surface is outside.
+insert into feature (dataset_id, source_id, category, subcategory, name_fr, props, geom) values
+  ('test', 'p2', 'park', 'borough_park', 'Parc Frontière', '{}',
+   st_makeenvelope(-73.572, 45.515, -73.560, 45.517, 4326));

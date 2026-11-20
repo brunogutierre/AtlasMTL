@@ -39,12 +39,17 @@ class IngestJobTest {
 
     String checksum = "v1";
 
+    /** Serves this file instead, for every source, when set. */
+    String override;
+
     @Override
     public Download download(Source source) {
       try {
         Path file = Files.createTempFile("fixture-", ".download");
         Files.copy(
-            Fixtures.open(FILES.get(source.id())), file, StandardCopyOption.REPLACE_EXISTING);
+            Fixtures.open(override != null ? override : FILES.get(source.id())),
+            file,
+            StandardCopyOption.REPLACE_EXISTING);
         return new Download("fixture:" + FILES.get(source.id()), file, checksum);
       } catch (IOException e) {
         throw new UncheckedIOException(e);
@@ -74,6 +79,7 @@ class IngestJobTest {
   @BeforeEach
   void loadEverything() {
     ckan.checksum = "v1";
+    ckan.override = null;
     job.run(Set.of(), true);
   }
 
@@ -132,5 +138,17 @@ class IngestJobTest {
         .param("id", id)
         .query(java.time.OffsetDateTime.class)
         .single();
+  }
+
+  @Test
+  void refusesToEmptyADatasetAndKeepsItsRows() {
+    ckan.checksum = "v2";
+    ckan.override = "empty.geojson";
+
+    org.assertj.core.api.Assertions.assertThatThrownBy(() -> job.run(Set.of("parks"), false))
+        .hasMessageContaining("refusing to replace 3 rows with 0");
+    assertThat(count("select count(*) from feature where dataset_id = 'parks'")).isEqualTo(3);
+    assertThat(count("select count(*) from dataset where id = 'parks' and checksum = 'v1'"))
+        .isOne();
   }
 }

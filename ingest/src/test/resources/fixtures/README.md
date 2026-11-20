@@ -7,3 +7,4 @@ Small extracts of the real open data files, with geometries replaced by a small 
 - `addresses.csv`: Ville de Montréal, *Adresses ponctuelles*
 - `installations.csv`: Ministère de la Santé et des Services sociaux, *Fichiers cartographiques M02 des installations et établissements* (keeps the source's UTF-8 BOM)
 - `schools-public.geojson`, `schools-private.geojson`: Ministère de l'Éducation, *Localisation des établissements d'enseignement du réseau scolaire au Québec*
+- `empty.geojson`: an empty collection, to test that a load never empties a dataset
