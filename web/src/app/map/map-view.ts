@@ -8,6 +8,7 @@ import {
   effect,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { TesseraTheme } from '@brunogutierre/tessera';
@@ -30,6 +31,9 @@ const STYLES = {
 export class MapView {
   readonly places = input<readonly Place[]>([]);
   readonly boroughs = input<readonly BoroughShape[]>([]);
+  /** The highlighted place, shared with the result list. */
+  readonly selected = input<number | null>(null);
+  readonly selectedChange = output<number>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly engine = inject(MAP_ENGINE);
@@ -38,7 +42,11 @@ export class MapView {
   private readonly style = computed(() => STYLES[this.theme.resolvedMode()]);
 
   constructor() {
-    afterNextRender(() => this.map.set(this.engine(this.host.nativeElement, this.style())));
+    afterNextRender(() => {
+      const map = this.engine(this.host.nativeElement, this.style());
+      map.onSelect((id) => this.selectedChange.emit(id));
+      this.map.set(map);
+    });
     inject(DestroyRef).onDestroy(() => this.map()?.destroy());
 
     effect(() => this.map()?.setStyle(this.style()));
@@ -61,6 +69,11 @@ export class MapView {
       if (area) {
         this.map()?.fit(area);
       }
+    });
+    effect(() => {
+      const id = this.selected();
+      const place = this.places().find((p) => p.id === id);
+      this.map()?.select(id, place ? [place.longitude, place.latitude] : undefined);
     });
   }
 }

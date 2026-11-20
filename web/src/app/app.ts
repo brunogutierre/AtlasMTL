@@ -21,6 +21,6 @@ export class App {
   protected readonly theme = inject(TesseraTheme);
   protected readonly modes: readonly Mode[] = ['light', 'dark', 'system'];
   protected readonly boroughs = inject(BoroughApi).boroughsResource();
-  /** The places of the latest answer. */
-  protected readonly places = inject(ChatSession).places;
+  /** The latest answer's places, and the one highlighted in the list and on the map. */
+  protected readonly session = inject(ChatSession);
 }

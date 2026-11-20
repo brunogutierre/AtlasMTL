@@ -9,15 +9,20 @@ describe('MapView', () => {
   let shown: MapLayers[];
   let styles: string[];
   let fitted: unknown[];
+  let selections: (number | null)[];
+  let clicks: (id: number) => void;
 
   beforeEach(() => {
     shown = [];
     styles = [];
     fitted = [];
+    selections = [];
     const handle: MapHandle = {
       show: (layers) => shown.push(layers),
       fit: (area) => fitted.push(area),
       setStyle: (url) => styles.push(url),
+      select: (id) => selections.push(id),
+      onSelect: (listener) => (clicks = listener),
       destroy() {},
     };
     TestBed.configureTestingModule({
@@ -58,5 +63,18 @@ describe('MapView', () => {
     await fixture.whenStable();
 
     expect(styles.at(-1)).toContain('/styles/dark');
+  });
+
+  it('highlights the selected place and reports clicks on the map', async () => {
+    const fixture = TestBed.createComponent(MapView);
+    fixture.componentRef.setInput('selected', 7);
+    let clicked: number | undefined;
+    fixture.componentInstance.selectedChange.subscribe((id) => (clicked = id));
+    await fixture.whenStable();
+
+    clicks(9);
+
+    expect(selections.at(-1)).toBe(7);
+    expect(clicked).toBe(9);
   });
 });

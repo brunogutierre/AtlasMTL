@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { TesAlert, TesButton, TesFormField, TesInput } from '@brunogutierre/tessera';
 import { I18n } from '../i18n';
-import { ChatSession } from './chat-session';
+import { ChatSession, type Step } from './chat-session';
 
 /** The conversation and the question form. */
 @Component({
@@ -29,6 +29,26 @@ export class ChatPanel {
     this.draft.set('');
     // The [value] binding may not see a change when typing and sending happen in one tick.
     this.textarea().nativeElement.value = '';
+  }
+
+  /** One line per tool call: what it did, with what, and what it found. */
+  protected describe(step: Step): { tool: string; arguments: string; outcome: string } {
+    const t = this.i18n.t().trace;
+    const result = step.result as { error?: string; total?: number; address?: string } | undefined;
+    let outcome = '…';
+    if (result?.error) {
+      outcome = `${t.failed}: ${result.error}`;
+    } else if (typeof result?.total === 'number') {
+      outcome = t.found(result.total);
+    } else if (result?.address) {
+      outcome = result.address;
+    } else if (result) {
+      outcome = '✓';
+    }
+    const args = Object.entries((step.arguments ?? {}) as Record<string, unknown>)
+      .map(([key, value]) => `${key}: ${String(value)}`)
+      .join(', ');
+    return { tool: t.tools[step.tool] ?? step.tool, arguments: args, outcome };
   }
 
   /** Enter sends; Shift+Enter starts a new line. */
