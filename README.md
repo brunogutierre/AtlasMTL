@@ -66,7 +66,8 @@ With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKE
 | Path | Purpose |
 |---|---|
 | `build-logic/` | Convention plugins: `atlas.java` (JDK 25 toolchain, `-Werror`, Spring Boot and Spring AI BOMs, Spotless) and `atlas.spring-boot` |
-| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads) |
+| `db/` | Flyway migrations (the schema) and a PostGIS Testcontainers fixture for tests |
+| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup |
 | `web/` | Angular 22 app (zoneless, Vitest) |
 | `compose.yaml` | Local PostGIS |
 | `docs/` | [Data spike](docs/data-spike.md) and [ADRs](docs/adr/) |

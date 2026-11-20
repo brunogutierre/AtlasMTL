@@ -20,4 +20,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "atlasmtl"
 
-include("server")
+include("db", "server")
