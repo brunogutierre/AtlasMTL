@@ -1,0 +1,27 @@
+# Render Blueprint for the public demo (https://render.com/docs/blueprint-spec). Secrets are
+# never written here: `sync: false` makes Render ask for each value when the Blueprint is applied.
+services:
+  - type: web
+    name: atlasmtl
+    runtime: docker
+    region: virginia # next to Neon's aws-us-east-1
+    plan: starter # 0.5 CPU, 512 MB, never sleeps
+    healthCheckPath: /actuator/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL # pooled: jdbc:postgresql://<endpoint>-pooler.<region>.aws.neon.tech/<db>?sslmode=require
+        sync: false
+      - key: DATABASE_MIGRATION_URL # direct: the same without "-pooler"
+        sync: false
+      - key: DATABASE_USER
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: DATABASE_OPTIONS # empty through the pooler; the timeout is set on the role
+        value: ""
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ATLAS_VISITOR_KEY
+        generateValue: true
+      - key: ATLAS_GLOBAL_DAILY_USD
+        value: "2.00"
