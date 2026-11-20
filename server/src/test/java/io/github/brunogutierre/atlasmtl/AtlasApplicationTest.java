@@ -2,27 +2,15 @@ package io.github.brunogutierre.atlasmtl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.brunogutierre.atlasmtl.db.Postgis;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
 @SpringBootTest
+@Import(TestDatabase.class)
 class AtlasApplicationTest {
-
-  @TestConfiguration(proxyBeanMethods = false)
-  static class Containers {
-    @Bean
-    @ServiceConnection
-    PostgreSQLContainer postgis() {
-      return Postgis.container();
-    }
-  }
 
   @Autowired JdbcClient jdbc;
 
