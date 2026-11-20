@@ -39,8 +39,8 @@ public final class Parks {
     if (area != null) {
       props.put("area_ha", Math.round(Double.parseDouble(area) * 100) / 100.0);
     }
-    putIfPresent(props, "owner", f.text("PROPRIETE"));
-    putIfPresent(props, "use", f.text("TYPO2"));
+    Rows.putIfPresent(props, "owner", f.text("PROPRIETE"));
+    Rows.putIfPresent(props, "use", f.text("TYPO2"));
     return new Rows.Feature(
         String.valueOf(f.text("OBJECTID")),
         "park",
@@ -49,11 +49,5 @@ public final class Parks {
         null,
         props,
         f.geometry());
-  }
-
-  static void putIfPresent(Map<String, Object> props, String key, @Nullable String value) {
-    if (value != null) {
-      props.put(key, value);
-    }
   }
 }

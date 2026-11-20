@@ -8,6 +8,13 @@ public final class Rows {
 
   private Rows() {}
 
+  /** Adds a property only when the source has a value, so {@code props} has no nulls. */
+  static void putIfPresent(Map<String, Object> props, String key, @Nullable String value) {
+    if (value != null && !value.isBlank()) {
+      props.put(key, value.strip());
+    }
+  }
+
   /**
    * A row of {@code feature}.
    *
