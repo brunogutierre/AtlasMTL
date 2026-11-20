@@ -159,6 +159,23 @@ public class GeoQueries {
         .list();
   }
 
+  /** How many places each category has. */
+  public Map<Category, Integer> countByCategory() {
+    var counts = new java.util.EnumMap<Category, Integer>(Category.class);
+    for (Category category : Category.values()) {
+      counts.put(category, 0);
+    }
+    jdbc.sql("select category, count(*)::int as n from feature group by category")
+        .query((rs, i) -> {
+          counts.put(
+              Category.valueOf(rs.getString("category").toUpperCase(java.util.Locale.ROOT)),
+              rs.getInt("n"));
+          return null;
+        })
+        .list();
+    return counts;
+  }
+
   /**
    * The borough or linked city named like {@code name}, ignoring case and accents, or the most
    * similar name when there is no exact match ("Plateau" finds "Le Plateau-Mont-Royal").
