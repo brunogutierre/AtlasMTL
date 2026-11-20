@@ -81,6 +81,14 @@ The Angular client in `web/src/app/api` is generated from the Java controllers a
 
 `npx ng serve` proxies `/api` to the server on port 8080, or on `API_PORT` when set (`web/proxy.conf.mjs`).
 
+Evaluate the agent against the real model (costs tokens; needs data loaded by the ingest job):
+
+```bash
+ANTHROPIC_API_KEY=… ./gradlew :server:evals   # report in server/build/reports/evals/report.md
+```
+
+The golden questions live in `server/src/test/resources/evals/golden.yaml`. Each one names the tools a good answer calls, their arguments and the expected number of places. The `Evals` workflow runs them on demand.
+
 Run `./gradlew spotlessApply` on its own to format Java (google-java-format) and Gradle scripts (ktlint).
 
 With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true ./gradlew build`.

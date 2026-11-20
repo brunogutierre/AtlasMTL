@@ -1,0 +1,70 @@
+# Golden questions for the agent. Each one says which tools a good answer calls, with which
+# arguments, and how many places the main tool should find in the real data. Checked by
+# `./gradlew :server:evals` against the real model and a database loaded by the ingest job.
+- id: schools-near-hospitals
+  question: Schools within 1 km of a hospital
+  expect:
+    tools: [within_distance]
+    arguments:
+      within_distance: { sourceCategory: SCHOOL, targetCategory: HOSPITAL, meters: 1000 }
+    total: { tool: within_distance, min: 150, max: 300 }
+- id: large-parks-rosemont
+  question: Parks larger than 2 hectares in Rosemont–La Petite-Patrie
+  expect:
+    tools: [find_features]
+    arguments:
+      find_features: { category: PARK, borough: Rosemont, minAreaHectares: 2 }
+    total: { tool: find_features, min: 5, max: 40 }
+- id: parks-per-km2
+  question: Which borough has the most parks per km²?
+  expect:
+    tools: [count_by_borough]
+    arguments:
+      count_by_borough: { category: PARK }
+    answerMentions: [Plateau]
+- id: parks-near-address
+  question: Parks within 500 m of 1000 rue Sherbrooke Ouest
+  expect:
+    tools: [geocode, find_features]
+    arguments:
+      geocode: { address: Sherbrooke }
+      find_features: { category: PARK, radiusMeters: 500 }
+    total: { tool: find_features, min: 1, max: 20 }
+- id: clsc-cdn-ndg
+  question: CLSCs in Côte-des-Neiges–Notre-Dame-de-Grâce
+  expect:
+    tools: [find_features]
+    arguments:
+      find_features: { category: CLSC, borough: Côte-des-Neiges }
+    total: { tool: find_features, min: 1, max: 10 }
+- id: fr-hopitaux-ville-marie
+  question: Quels hôpitaux se trouvent dans Ville-Marie ?
+  expect:
+    tools: [find_features]
+    arguments:
+      find_features: { category: HOSPITAL, borough: Ville-Marie }
+    total: { tool: find_features, min: 2, max: 15 }
+    answerLanguage: fr
+- id: fr-chsld-par-arrondissement
+  question: Combien de CHSLD y a-t-il par arrondissement ?
+  expect:
+    tools: [count_by_borough]
+    arguments:
+      count_by_borough: { category: LONG_TERM_CARE }
+    answerLanguage: fr
+- id: linked-city
+  question: Primary schools in Westmount
+  expect:
+    tools: [find_features]
+    arguments:
+      find_features: { category: SCHOOL, borough: Westmount }
+    total: { tool: find_features, min: 1, max: 15 }
+- id: out-of-scope
+  question: What is the best restaurant in Montréal?
+  expect:
+    maxToolCalls: 1
+    answerMentions: []
+- id: unsupported-category
+  question: Where are the museums in the Plateau?
+  expect:
+    maxToolCalls: 2
