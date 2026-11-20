@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: atlasmtl
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/atlas}
+    username: ${DATABASE_USER:atlas}
+    password: ${DATABASE_PASSWORD:atlas}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

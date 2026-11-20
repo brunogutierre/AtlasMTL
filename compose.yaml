@@ -1,0 +1,15 @@
+# Local PostGIS for development: `docker compose up -d` (or `podman compose up -d`).
+services:
+  postgis:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_DB: atlas
+      POSTGRES_USER: atlas
+      POSTGRES_PASSWORD: atlas
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis:/var/lib/postgresql/data
+
+volumes:
+  postgis:
