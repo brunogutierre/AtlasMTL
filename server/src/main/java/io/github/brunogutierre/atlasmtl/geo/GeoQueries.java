@@ -162,6 +162,27 @@ public class GeoQueries {
         .list();
   }
 
+  /**
+   * Every borough and linked city, simplified for drawing (about 10 m): the full outlines weigh
+   * over a megabyte, the simplified ones a fraction of it.
+   */
+  public List<BoroughShape> boroughShapes() {
+    return jdbc.sql(
+            """
+            select id, name, kind,
+              st_asgeojson(st_multi(st_simplifypreservetopology(geom, 0.0001)), 5) as geometry
+            from borough
+            order by name
+            """)
+        .query((rs, i) ->
+            new BoroughShape(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("kind"),
+                json.readTree(rs.getString("geometry"))))
+        .list();
+  }
+
   /** How many places each category has. */
   public Map<Category, Integer> countByCategory() {
     var counts = new java.util.EnumMap<Category, Integer>(Category.class);

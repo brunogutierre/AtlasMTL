@@ -2,6 +2,13 @@
 
 export type AgentEvent = Token | ToolCall | ToolResult | Features | Usage | Done | Failure;
 
+export interface BoroughShape {
+  id: number;
+  name: string;
+  kind: string;
+  geometry: unknown;
+}
+
 export const CategoryValues = ['PARK', 'SCHOOL', 'HOSPITAL', 'CLSC', 'LONG_TERM_CARE', 'AMBULATORY_CARE'] as const;
 export type Category = (typeof CategoryValues)[number];
 
