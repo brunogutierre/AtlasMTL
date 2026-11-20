@@ -127,6 +127,8 @@ public class Loader {
   }
 
   private void saveDataset(Source source, Ckan.Download download) {
+    // Cached answers may cite the old rows; they go with them, in the same transaction.
+    jdbc.sql("delete from answer_cache").update();
     jdbc.sql(
             """
             insert into dataset (id, title, publisher, source_url, license, fetched_at, checksum)

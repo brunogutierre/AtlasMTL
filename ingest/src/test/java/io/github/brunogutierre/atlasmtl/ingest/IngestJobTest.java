@@ -111,6 +111,17 @@ class IngestJobTest {
   }
 
   @Test
+  void dropsCachedAnswersWhenADatasetChanges() {
+    jdbc.sql("insert into answer_cache (question_key, question, events) values ('q', 'Q', '[]')")
+        .update();
+
+    ckan.checksum = "v2";
+    job.run(Set.of("parks"), false);
+
+    assertThat(count("select count(*) from answer_cache")).isZero();
+  }
+
+  @Test
   void storesPropsAsJson() {
     String area =
         jdbc.sql("select props->>'area_ha' from feature where name_fr = 'Dieppe'")
