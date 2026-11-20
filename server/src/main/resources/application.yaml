@@ -10,8 +10,15 @@ spring:
     password: ${DATABASE_PASSWORD:atlas}
     hikari:
       data-source-properties:
-        # No query may run longer than 5 s, whatever the tool arguments.
-        options: "-c statement_timeout=5000"
+        # No query may run longer than 5 s, whatever the tool arguments. Through a transaction
+        # pooler (Neon's PgBouncer), set DATABASE_OPTIONS empty and the timeout on the role instead.
+        options: ${DATABASE_OPTIONS:-c statement_timeout=5000}
+  flyway:
+    # Migrations take a session-level lock, which transaction poolers don't support: they can use
+    # a direct connection while the app uses the pooled one.
+    url: ${DATABASE_MIGRATION_URL:${spring.datasource.url}}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
   mvc:
     async:
       # An answer with several tool calls can take a while; the agent stops at 6 calls.
@@ -29,6 +36,8 @@ spring:
           temperature: 0.2
 
 server:
+  # Hosts such as Render pass the port to listen on in PORT.
+  port: ${PORT:8080}
   # Behind a proxy, take the client address from X-Forwarded-For, trusting only proxies on private
   # networks (Tomcat's default internal proxies). The rate limits and budgets depend on it.
   forward-headers-strategy: native
