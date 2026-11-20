@@ -66,6 +66,23 @@ class GeoQueriesTest {
   }
 
   @Test
+  void neverPairsAPlaceWithItself() {
+    Found<Match> schools = geo.withinDistance(Category.SCHOOL, Category.SCHOOL, 1000, null, 10);
+
+    assertThat(schools.places())
+        .allSatisfy(m -> assertThat(m.nearest().id()).isNotEqualTo(m.place().id()));
+    assertThat(schools.places()).extracting(Match::meters).containsOnly(959);
+  }
+
+  @Test
+  void placesABoundaryParkInOneBoroughForListsAndCounts() {
+    assertThat(geo.find(Category.PARK, plateau(), null, 10).places())
+        .extracting(Place::name)
+        .containsExactly("Parc Carré");
+    assertThat(geo.countByBorough(Category.PARK).get(0).count()).isEqualTo(1);
+  }
+
+  @Test
   void countsPerBoroughWithDensity() {
     assertThat(geo.countByBorough(Category.SCHOOL))
         .extracting(BoroughCount::name, BoroughCount::count)

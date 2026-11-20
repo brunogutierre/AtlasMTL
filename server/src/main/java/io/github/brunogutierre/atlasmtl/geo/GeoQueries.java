@@ -29,6 +29,13 @@ public class GeoQueries {
       f.props::text as props, st_x(p) as lon, st_y(p) as lat, st_asgeojson(f.geom, 6) as geometry
       """;
 
+  /**
+   * A place is in a borough when its point on surface is: the same rule as {@link #countByBorough},
+   * so a park on a boundary is listed and counted in one borough only.
+   */
+  private static final String IN_BOROUGH =
+      "st_contains((select geom from borough where id = :borough), p)";
+
   private final JdbcClient jdbc;
   private final JsonMapper json;
 
@@ -48,7 +55,7 @@ public class GeoQueries {
     sql.append(" from feature f cross join lateral st_pointonsurface(f.geom) as p");
     sql.append(" where f.category = :category");
     if (borough != null) {
-      sql.append(" and st_intersects(f.geom, (select geom from borough where id = :borough))");
+      sql.append(" and ").append(IN_BOROUGH);
     }
     if (near != null) {
       checkMeters(near.meters());
@@ -100,7 +107,7 @@ public class GeoQueries {
             t.props::text as t_props, st_x(tp) as t_lon, st_y(tp) as t_lat,
             st_asgeojson(t.geom, 6) as t_geometry, t.geom as t_geom
           from feature t cross join lateral st_pointonsurface(t.geom) as tp
-          where t.category = :target
+          where t.category = :target and t.id <> f.id
             and st_dwithin(f.geom::geography, t.geom::geography, :meters)
           order by f.geom::geography <-> t.geom::geography
           limit 1) as t
@@ -108,11 +115,7 @@ public class GeoQueries {
         order by meters, f.id
         limit :limit
         """
-            .formatted(
-                PLACE,
-                borough == null
-                    ? ""
-                    : "and st_intersects(f.geom, (select geom from borough where id = :borough))");
+            .formatted(PLACE, borough == null ? "" : "and " + IN_BOROUGH);
     var query =
         jdbc.sql(sql)
             .param("source", source.id())

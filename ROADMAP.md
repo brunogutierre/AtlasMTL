@@ -20,8 +20,8 @@ AtlasMTL is a natural-language geospatial assistant over Montreal open data. A v
 
 | Decision | Choice | Why | Rejected |
 |---|---|---|---|
-| Agent framework | Spring AI 2.0 `ChatClient` + tool-calling advisor, `@Tool` beans | Native to Spring Boot 4, provider-agnostic, observability built in | LangChain4j (less Spring-native), a hand-rolled loop |
-| Model | Fast, cheap Claude model by default (configurable), prompt caching for the system prompt and tools; Ollama profile for local dev | Tool routing doesn't need the largest model; caching cuts demo cost | A single fixed model |
+| Agent framework | Spring AI 2.0 chat model + `@Tool` beans, with our own tool loop ([ADR 0009](docs/adr/0009-own-tool-loop.md)) | Native to Spring Boot 4, provider-agnostic, observability built in | LangChain4j (less Spring-native), a hand-rolled loop |
+| Model | Fast, cheap Claude model by default (configurable), prompt caching if the prompt is long enough to qualify; a scripted model for keyless development and tests | Tool routing doesn't need the largest model; caching cuts demo cost | A single fixed model |
 | Tool safety | Typed tools with enums and range checks (`meters ≤ 5000`, `limit ≤ 500`, max 6 tool steps); the LLM never writes SQL | No SQL injection or runaway queries, and behavior can be tested | Text-to-SQL |
 | Tool results | The LLM receives a short summary plus a `resultId`; the full GeoJSON goes only to the client | Keeps tokens low and the context small | Sending GeoJSON to the model |
 | Streaming | SSE over `POST` (`fetch` + `ReadableStream`); sealed `AgentEvent` = `Token \| ToolCall \| ToolResult \| Features \| Usage \| Done \| Error` | One-way traffic is enough; typed on both sides via RecordBridge | WebSockets (two-way not needed), `EventSource` (GET only), WebFlux everywhere |

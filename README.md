@@ -17,7 +17,7 @@ Show an end-to-end LLM feature built the way production teams need it:
 | Area | Choice |
 |---|---|
 | Backend | Java 25, Spring Boot 4 (Spring MVC + virtual threads) |
-| AI | Spring AI 2.0 `ChatClient` with tool calling; Claude (Anthropic) by default, Ollama for local dev |
+| AI | Spring AI 2.0 with Claude (Anthropic) and typed `@Tool`s, run by our own bounded tool loop |
 | Data | PostgreSQL + PostGIS, Flyway, `JdbcClient` with explicit SQL |
 | Frontend | Angular 22 (signals, zoneless), [Tessera](https://github.com/brunogutierre/Tessera) design system, typed EN/FR messages |
 | Map | MapLibre GL JS + OpenFreeMap tiles |
@@ -29,7 +29,7 @@ Show an end-to-end LLM feature built the way production teams need it:
 
 ```
 Angular (map + chat) ──POST /api/ask (SSE)──► Spring Boot
-       ▲                                          │ ChatClient + tool-calling advisor
+       ▲                                          │ own tool loop (≤ 6 tool calls)
        │ Token | ToolCall | Features | Done ...   ▼
        └──────────────────────────────── Tools (find, within_distance, count_by_borough, geocode)
                                                   │ parameterized SQL
@@ -64,7 +64,7 @@ curl -N -X POST localhost:8080/api/ask -H 'Content-Type: application/json' \
   -d '{"text": "Schools within 1 km of a hospital in Rosemont?"}'
 ```
 
-Without `ANTHROPIC_API_KEY` the server still starts, and answers end with an `error` event. `ATLAS_MODEL` picks another Claude model.
+`DATABASE_URL` is a JDBC URL (`jdbc:postgresql://host/db`); hosted providers often hand out `postgres://user:pass@host/db`, which must be split into `DATABASE_URL`, `DATABASE_USER` and `DATABASE_PASSWORD`. Without `ANTHROPIC_API_KEY` the server still starts, and answers end with an `error` event. `ATLAS_MODEL` picks another Claude model.
 
 Load the real open data into the local database (downloads ~60 MB; unchanged files are skipped on the next run):
 

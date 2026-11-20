@@ -8,6 +8,10 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/atlas}
     username: ${DATABASE_USER:atlas}
     password: ${DATABASE_PASSWORD:atlas}
+    hikari:
+      data-source-properties:
+        # No query may run longer than 5 s, whatever the tool arguments.
+        options: "-c statement_timeout=5000"
   mvc:
     async:
       # An answer with several tool calls can take a while; the agent stops at 6 calls.

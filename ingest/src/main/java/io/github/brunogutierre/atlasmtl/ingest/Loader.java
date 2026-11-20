@@ -39,66 +39,91 @@ public class Loader {
   @Transactional
   public int features(Source source, Ckan.Download download, List<Rows.Feature> features) {
     saveDataset(source, download);
-    jdbc.sql("delete from feature where dataset_id = :id").param("id", source.id()).update();
+    int previous =
+        jdbc.sql("delete from feature where dataset_id = :id").param("id", source.id()).update();
     // ST_MakeValid: a few source polygons self-intersect, which breaks spatial predicates.
-    return batches(
-        features.stream(),
-        """
-        insert into feature
-          (dataset_id, source_id, category, subcategory, name_fr, name_en, props, geom)
-        values (?, ?, ?, ?, ?, ?, ?::jsonb, st_makevalid(st_setsrid(st_geomfromgeojson(?), 4326)))
-        """,
-        f ->
-            new Object[] {
-              source.id(),
-              f.sourceId(),
-              f.category(),
-              f.subcategory(),
-              f.nameFr(),
-              f.nameEn(),
-              json.writeValueAsString(f.props()),
-              f.geometry()
-            });
+    int loaded =
+        batches(
+            features.stream(),
+            """
+            insert into feature
+              (dataset_id, source_id, category, subcategory, name_fr, name_en, props, geom)
+            values (?, ?, ?, ?, ?, ?, ?::jsonb, st_makevalid(st_setsrid(st_geomfromgeojson(?), 4326)))
+            """,
+            f ->
+                new Object[] {
+                  source.id(),
+                  f.sourceId(),
+                  f.category(),
+                  f.subcategory(),
+                  f.nameFr(),
+                  f.nameEn(),
+                  json.writeValueAsString(f.props()),
+                  f.geometry()
+                });
+    return checked(source, previous, loaded);
   }
 
   @Transactional
   public int boroughs(Source source, Ckan.Download download, List<Rows.Borough> boroughs) {
     saveDataset(source, download);
-    jdbc.sql("delete from borough").update();
-    return batches(
-        boroughs.stream(),
-        """
-        insert into borough (id, name, kind, geom)
-        values (?, ?, ?, st_multi(st_collectionextract(
-          st_makevalid(st_setsrid(st_geomfromgeojson(?), 4326)), 3)))
-        """,
-        b -> new Object[] {b.id(), b.name(), b.kind(), b.geometry()});
+    int previous = jdbc.sql("delete from borough").update();
+    int loaded =
+        batches(
+            boroughs.stream(),
+            """
+            insert into borough (id, name, kind, geom)
+            values (?, ?, ?, st_multi(st_collectionextract(
+              st_makevalid(st_setsrid(st_geomfromgeojson(?), 4326)), 3)))
+            """,
+            b -> new Object[] {b.id(), b.name(), b.kind(), b.geometry()});
+    return checked(source, previous, loaded);
   }
 
   @Transactional
   public int addresses(Source source, Ckan.Download download, Stream<Rows.Address> addresses) {
     saveDataset(source, download);
-    jdbc.sql("delete from address").update();
-    return batches(
-        addresses,
-        """
-        insert into address (id, number_from, number_to, street_type, street_link, street_name,
-          orientation, street_key, geom)
-        values (?, ?, ?, ?, ?, ?, ?, ?, st_setsrid(st_makepoint(?, ?), 4326))
-        """,
-        a ->
-            new Object[] {
-              a.id(),
-              a.numberFrom(),
-              a.numberTo(),
-              a.streetType(),
-              a.streetLink(),
-              a.streetName(),
-              a.orientation(),
-              a.streetKey(),
-              a.longitude(),
-              a.latitude()
-            });
+    int previous = jdbc.sql("delete from address").update();
+    int loaded =
+        batches(
+            addresses,
+            """
+            insert into address (id, number_from, number_to, street_type, street_link, street_name,
+              orientation, street_key, geom)
+            values (?, ?, ?, ?, ?, ?, ?, ?, st_setsrid(st_makepoint(?, ?), 4326))
+            """,
+            a ->
+                new Object[] {
+                  a.id(),
+                  a.numberFrom(),
+                  a.numberTo(),
+                  a.streetType(),
+                  a.streetLink(),
+                  a.streetName(),
+                  a.orientation(),
+                  a.streetKey(),
+                  a.longitude(),
+                  a.latitude()
+                });
+    return checked(source, previous, loaded);
+  }
+
+  /**
+   * Refuses a load that would empty a dataset or shrink it by more than half: that is a source that
+   * changed its format, not the city closing half its parks. Throwing rolls the transaction back,
+   * so the previous rows stay, and the job fails loudly.
+   */
+  static int checked(Source source, int previous, int loaded) {
+    if (loaded == 0 || loaded < previous / 2) {
+      throw new IllegalStateException(
+          source.id()
+              + ": refusing to replace "
+              + previous
+              + " rows with "
+              + loaded
+              + "; check the source file");
+    }
+    return loaded;
   }
 
   private void saveDataset(Source source, Ckan.Download download) {
