@@ -27,7 +27,7 @@ AtlasMTL is a natural-language geospatial assistant over Montreal open data. A v
 | Streaming | SSE over `POST` (`fetch` + `ReadableStream`); sealed `AgentEvent` = `Token \| ToolCall \| ToolResult \| Features \| Usage \| Done \| Error` | One-way traffic is enough; typed on both sides via RecordBridge | WebSockets (two-way not needed), `EventSource` (GET only), WebFlux everywhere |
 | Server model | Spring MVC + virtual threads | Simple blocking code that still scales for I/O-bound LLM calls | Reactive stack |
 | Data access | `JdbcClient` with explicit SQL (`ST_DWithin` on geography, `ST_Within`, `ST_Buffer`) | Spatial SQL stays visible and reviewable | JPA + Hibernate Spatial (hidden SQL, awkward spatial joins) |
-| Ingest | Java `ingest` module run weekly by GitHub Actions cron: download → checksum (skip if unchanged) → staging table → normalize → swap in one transaction | Decoupled from web uptime and memory; repeatable | Spring Batch (overkill), ogr2ogr (extra tool, normalization in SQL scripts), `@Scheduled` in the web app |
+| Ingest | Java `ingest` module run weekly by GitHub Actions cron: download → checksum (skip if unchanged) → normalize → replace the dataset's rows in one transaction | Decoupled from web uptime and memory; repeatable | Spring Batch (overkill), ogr2ogr (extra tool, normalization in SQL scripts), `@Scheduled` in the web app |
 | Geocoding | Local Montreal address dataset with a `pg_trgm` index | Free, no usage-policy issues, fast | Public Nominatim (usage policy), paid geocoders |
 | Map | MapLibre GL JS + OpenFreeMap tiles; colors from Tessera tokens | Vector tiles, handles large GeoJSON, no API key | Leaflet (raster-first), Mapbox (key, pricing), OpenLayers (heavier API) |
 | Auth | None. The demo is public, and ingest runs only in CI | Nothing to protect, fewer moving parts | Bring-your-own API key (liability of handling other people's keys) |
@@ -85,7 +85,7 @@ See [ADR 0004](docs/adr/0004-one-feature-table-explicit-sql.md).
 ### M1: Data
 3. `feat(db)`: schema migrations plus Testcontainers
 4. `feat(ingest)`: dataset readers and normalizer (categories, `name_fr`/`name_en`)
-5. `feat(ingest)`: staging/swap runner plus weekly cron workflow
+5. `feat(ingest)`: loader, runner and weekly cron workflow
 
 ### M2: Agent
 6. `feat(geo)`: spatial query service

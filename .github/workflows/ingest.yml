@@ -1,0 +1,66 @@
+name: Ingest
+
+# Refreshes the open datasets in the production database once a week, and on demand.
+# See docs/adr/0005-ingest-as-ci-job.md.
+on:
+  schedule:
+    - cron: '17 7 * * 1' # Mondays, 07:17 UTC
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Dataset ids to refresh, comma-separated (empty: all)'
+        required: false
+        default: ''
+      force:
+        description: 'Reload even if a file did not change'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_USER: ${{ secrets.DATABASE_USER }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+    steps:
+      - name: Check that a database is configured
+        id: database
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::notice::No DATABASE_URL secret yet (the database arrives with the deploy); skipping."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.database.outputs.configured == 'true'
+
+      - uses: actions/setup-java@v6
+        if: steps.database.outputs.configured == 'true'
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+        if: steps.database.outputs.configured == 'true'
+
+      - name: Refresh the datasets
+        if: steps.database.outputs.configured == 'true'
+        env:
+          ONLY: ${{ inputs.only }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          args=()
+          [ -n "$ONLY" ] && args+=("--only=$ONLY")
+          [ "$FORCE" = "true" ] && args+=("--force")
+          ./gradlew :ingest:bootRun --args="${args[*]}"
