@@ -1,0 +1,64 @@
+name: Evals
+
+# Asks the golden questions to the real model against freshly ingested open data.
+# Manual only: every run costs model tokens (about 10 questions).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    services:
+      postgis:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_DB: atlas
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U atlas" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - name: Check that a model key is configured
+        id: key
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::notice::No ANTHROPIC_API_KEY secret; skipping the evals."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.key.outputs.configured == 'true'
+
+      - uses: actions/setup-java@v6
+        if: steps.key.outputs.configured == 'true'
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+        if: steps.key.outputs.configured == 'true'
+
+      - name: Load the open data
+        if: steps.key.outputs.configured == 'true'
+        run: ./gradlew :ingest:bootRun
+
+      - name: Ask the golden questions
+        if: steps.key.outputs.configured == 'true'
+        run: ./gradlew :server:evals
+
+      - name: Keep the report
+        if: always() && steps.key.outputs.configured == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: eval-report
+          path: server/build/reports/evals/
