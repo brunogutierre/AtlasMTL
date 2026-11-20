@@ -22,10 +22,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "maplibre-gl-worker.mjs",
+                "input": "node_modules/maplibre-gl/dist",
+                "output": "/"
               }
             ],
             "styles": [
               "node_modules/@brunogutierre/tessera/styles/tessera.css",
+              "node_modules/maplibre-gl/dist/maplibre-gl.css",
               "src/styles.css"
             ]
           },
@@ -65,7 +71,7 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "proxy.conf.json"
+            "proxyConfig": "proxy.conf.mjs"
           }
         },
         "test": {

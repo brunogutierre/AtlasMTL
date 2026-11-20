@@ -47,6 +47,7 @@
 
 .map {
   min-height: 24rem;
+  overflow: hidden;
   border-radius: var(--tes-radius-md);
   border: 1px solid var(--tes-color-border);
 }

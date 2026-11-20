@@ -79,7 +79,7 @@ The Angular client in `web/src/app/api` is generated from the Java controllers a
 ./gradlew :server:generateTypeScript   # after changing a controller, an event or a DTO
 ```
 
-`npx ng serve` proxies `/api` to the server on port 8080 (`web/proxy.conf.json`).
+`npx ng serve` proxies `/api` to the server on port 8080, or on `API_PORT` when set (`web/proxy.conf.mjs`).
 
 Run `./gradlew spotlessApply` on its own to format Java (google-java-format) and Gradle scripts (ktlint).
 

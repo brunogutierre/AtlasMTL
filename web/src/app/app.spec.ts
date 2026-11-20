@@ -1,18 +1,30 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideTessera } from '@brunogutierre/tessera';
 import { App } from './app';
 import { I18n } from './i18n';
+import { MAP_ENGINE, type MapHandle } from './map/map-engine';
+
+const noMap: MapHandle = { show() {}, fit() {}, setStyle() {}, destroy() {} };
 
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      providers: [provideTessera({ theme: 'enterprise', mode: 'light' })],
+      providers: [
+        provideTessera({ theme: 'enterprise', mode: 'light' }),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: MAP_ENGINE, useValue: () => noMap },
+      ],
     });
   });
 
   async function render() {
     const fixture = TestBed.createComponent(App);
+    TestBed.tick(); // starts the boroughs request
+    TestBed.inject(HttpTestingController).expectOne('/api/boroughs').flush([]);
     await fixture.whenStable();
     return { fixture, element: fixture.nativeElement as HTMLElement };
   }

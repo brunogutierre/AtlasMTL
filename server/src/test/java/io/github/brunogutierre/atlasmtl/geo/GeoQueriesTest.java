@@ -94,6 +94,15 @@ class GeoQueriesTest {
   }
 
   @Test
+  void drawsEveryBoroughOutline() {
+    assertThat(geo.boroughShapes())
+        .extracting(BoroughShape::name, s -> s.geometry().get("type").asString())
+        .containsExactly(
+            org.assertj.core.groups.Tuple.tuple("Le Plateau-Mont-Royal", "MultiPolygon"),
+            org.assertj.core.groups.Tuple.tuple("Westmount", "MultiPolygon"));
+  }
+
+  @Test
   void findsBoroughsIgnoringCaseAccentsAndPartialNames() {
     assertThat(geo.borough("WESTMOUNT")).map(Borough::kind).contains("linked_city");
     assertThat(geo.borough("le plateau mont royal"))

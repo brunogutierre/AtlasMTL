@@ -35,7 +35,9 @@
   <section tes-card class="chat" aria-labelledby="chat-title">
     <h2 id="chat-title">{{ i18n.t().chat.title }}</h2>
   </section>
-  <section class="map" role="region" [attr.aria-label]="i18n.t().map.label"></section>
+  <section class="map" role="region" [attr.aria-label]="i18n.t().map.label">
+    <app-map-view [places]="places()" [boroughs]="boroughs.hasValue() ? boroughs.value() : []" />
+  </section>
 </main>
 
 <footer class="attribution">
