@@ -100,4 +100,18 @@ describe('ChatPanel', () => {
     expect(TestBed.inject(ChatSession).selected()).toBe(42);
     expect(button.getAttribute('aria-pressed')).toBe('true');
   });
+
+  it('offers example questions that ask right away', async () => {
+    const fixture = TestBed.createComponent(ChatPanel);
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const examples = element.querySelectorAll<HTMLButtonElement>('.example');
+
+    examples[2].click();
+    await fixture.whenStable();
+
+    expect(examples).toHaveLength(5);
+    expect(asked).toEqual([{ text: 'Which borough has the most parks per km²?' }]);
+    expect(element.querySelector('.examples')).toBeNull();
+  });
 });

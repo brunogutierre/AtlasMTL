@@ -101,3 +101,42 @@
   color: var(--tes-color-text-muted);
   font-size: 0.85rem;
 }
+
+.empty p {
+  margin: 0 0 1rem;
+}
+
+.empty h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--tes-color-text);
+}
+
+.examples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.example {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--tes-color-border);
+  border-radius: var(--tes-radius-md);
+  background: var(--tes-color-surface);
+  color: var(--tes-color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.example:hover {
+  background: var(--tes-color-surface-sunken);
+}
+
+.example:focus-visible {
+  outline: 2px solid var(--tes-color-primary);
+  outline-offset: 2px;
+}
