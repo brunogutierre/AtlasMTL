@@ -1,1 +1,6 @@
-/* You can add global styles to this file, and also import other style files */
+/* Tessera's tokens and components come from angular.json; this file holds app-wide basics. */
+html,
+body {
+  margin: 0;
+  height: 100%;
+}

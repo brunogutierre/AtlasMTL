@@ -19,7 +19,7 @@ Show an end-to-end LLM feature built the way production teams need it:
 | Backend | Java 25, Spring Boot 4 (Spring MVC + virtual threads) |
 | AI | Spring AI 2.0 `ChatClient` with tool calling; Claude (Anthropic) by default, Ollama for local dev |
 | Data | PostgreSQL + PostGIS, Flyway, `JdbcClient` with explicit SQL |
-| Frontend | Angular 22 (signals, zoneless), [Tessera](https://github.com/brunogutierre/Tessera) design system, Transloco EN/FR |
+| Frontend | Angular 22 (signals, zoneless), [Tessera](https://github.com/brunogutierre/Tessera) design system, typed EN/FR messages |
 | Map | MapLibre GL JS + OpenFreeMap tiles |
 | API contract | [RecordBridge](https://github.com/brunogutierre/RecordBridge) generates the Angular client and event types |
 | Tests | JUnit 6, Testcontainers PostGIS, stub `ChatModel`, eval suite, Vitest, Playwright + axe |
@@ -85,7 +85,7 @@ With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKE
 | `db/` | Flyway migrations (the schema) and a PostGIS Testcontainers fixture for tests |
 | `ingest/` | Command-line job: finds each dataset through CKAN, downloads it, normalizes it and replaces its rows; run weekly by `.github/workflows/ingest.yml` |
 | `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup |
-| `web/` | Angular 22 app (zoneless, Vitest) |
+| `web/` | Angular 22 app (zoneless, Vitest) on the Tessera design system (Enterprise theme, light/dark/system), in English and French |
 | `compose.yaml` | Local PostGIS |
 | `docs/` | [Data spike](docs/data-spike.md) and [ADRs](docs/adr/) |
 
