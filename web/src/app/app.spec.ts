@@ -35,6 +35,7 @@ describe('App', () => {
 
     expect(element.querySelector('h1')?.textContent).toBe('AtlasMTL');
     expect(element.querySelector('#chat-title')?.textContent).toBe('Ask a question');
+    expect(element.querySelector('app-chat-panel textarea')).not.toBeNull();
     expect(element.querySelector('.attribution')?.textContent).toContain('CC BY 4.0');
   });
 
