@@ -24,6 +24,17 @@ public class ScriptedChatModel implements ChatModel {
       return new Turn(List.of(pieces), List.of());
     }
 
+    /** Several calls in one turn, given as tool, arguments, tool, arguments... */
+    public static Turn calls(String... toolsAndArguments) {
+      var calls = new ArrayList<AssistantMessage.ToolCall>();
+      for (int i = 0; i < toolsAndArguments.length; i += 2) {
+        calls.add(
+            new AssistantMessage.ToolCall(
+                "call-" + i, "function", toolsAndArguments[i], toolsAndArguments[i + 1]));
+      }
+      return new Turn(List.of(), calls);
+    }
+
     public static Turn call(String tool, String arguments) {
       return new Turn(
           List.of(),

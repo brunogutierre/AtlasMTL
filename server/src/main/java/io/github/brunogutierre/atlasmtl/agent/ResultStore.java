@@ -12,14 +12,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**
- * Keeps the full results of tool calls for the map, while the model only sees a summary and the
- * result id. Bounded in size and age: results are needed for a few minutes, not forever.
+ * Hands the full results of tool calls to the agent, while the model only sees a summary and the
+ * result id. The agent takes each result once, right after the tool ran, so the store stays nearly
+ * empty; the bounds only matter if an answer fails before taking its results.
  */
 @Component
 public class ResultStore {
 
-  static final int MAX_RESULTS = 1_000;
-  static final Duration MAX_AGE = Duration.ofMinutes(30);
+  static final int MAX_RESULTS = 100;
+  static final Duration MAX_AGE = Duration.ofMinutes(5);
 
   /** A stored result: what the tool found, in the order it found it. */
   public record Result(String id, String tool, List<Place> places, Instant storedAt) {}
@@ -48,10 +49,10 @@ public class ResultStore {
     return id;
   }
 
-  public synchronized Optional<Result> get(String id) {
-    Result result = results.get(id);
+  /** Removes and returns the result, if it is still there. */
+  public synchronized Optional<Result> take(String id) {
+    Result result = results.remove(id);
     if (result == null || result.storedAt().plus(MAX_AGE).isBefore(clock.instant())) {
-      results.remove(id);
       return Optional.empty();
     }
     return Optional.of(result);

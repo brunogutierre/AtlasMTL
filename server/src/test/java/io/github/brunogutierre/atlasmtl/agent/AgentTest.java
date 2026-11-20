@@ -92,6 +92,66 @@ class AgentTest {
     List<AgentEvent> events = ask("Anything");
 
     assertThat(events)
-        .containsExactly(new AgentEvent.Error("The assistant couldn't answer. Please try again."));
+        .containsExactly(new AgentEvent.Usage(0, 0, 0), new AgentEvent.Error(Agent.FAILURE));
+  }
+
+  @Test
+  void stopsAModelThatKeepsCallingToolsAfterTheLimit() {
+    var turns = new Turn[Agent.MAX_MODEL_CALLS + 5];
+    java.util.Arrays.fill(turns, Turn.call("count_by_borough", "{\"category\": \"PARK\"}"));
+    model.play(turns);
+
+    List<AgentEvent> events = ask("Never stop");
+
+    assertThat(model.prompts).hasSizeLessThanOrEqualTo(Agent.MAX_MODEL_CALLS);
+    assertThat(events.getLast()).isEqualTo(new AgentEvent.Done());
+  }
+
+  @Test
+  void refusesATurnWhoseCallsWouldCrossTheLimit() {
+    var turns = new java.util.ArrayList<Turn>();
+    for (int i = 0; i < Agent.MAX_TOOL_CALLS - 1; i++) {
+      turns.add(Turn.call("count_by_borough", "{\"category\": \"PARK\"}"));
+    }
+    turns.add(
+        Turn.calls(
+            "count_by_borough", "{\"category\": \"SCHOOL\"}",
+            "count_by_borough", "{\"category\": \"CLSC\"}"));
+    turns.add(Turn.text("Done."));
+    model.play(turns.toArray(Turn[]::new));
+
+    List<AgentEvent.ToolResult> results =
+        ask("Count").stream()
+            .filter(AgentEvent.ToolResult.class::isInstance)
+            .map(AgentEvent.ToolResult.class::cast)
+            .toList();
+
+    assertThat(results).hasSize(Agent.MAX_TOOL_CALLS + 1);
+    assertThat(results.subList(Agent.MAX_TOOL_CALLS - 1, Agent.MAX_TOOL_CALLS + 1))
+        .allSatisfy(r -> assertThat(r.result().get("error").asString()).contains("limit"));
+  }
+
+  @Test
+  void explainsInvalidArgumentsToTheModel() {
+    model.play(Turn.call("find_features", "{\"category\": \"MUSEUM\"}"), Turn.text("Sorry."));
+
+    var result =
+        ask("Museums?").stream()
+            .filter(AgentEvent.ToolResult.class::isInstance)
+            .map(AgentEvent.ToolResult.class::cast)
+            .findFirst()
+            .orElseThrow();
+
+    assertThat(result.result().get("error").asString()).contains("Invalid arguments", "MUSEUM");
+  }
+
+  @Test
+  void stopsWhenTheVisitorLeaves() throws InterruptedException {
+    model.play(Turn.call("count_by_borough", "{\"category\": \"PARK\"}"), Turn.text("Never sent."));
+
+    agent.ask("Parks per borough?").take(1).blockLast(Duration.ofSeconds(10));
+    Thread.sleep(300);
+
+    assertThat(model.prompts).hasSize(1);
   }
 }

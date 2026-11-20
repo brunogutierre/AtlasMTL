@@ -31,25 +31,32 @@ class ResultStoreTest {
   }
 
   @Test
-  void forgetsResultsAfterHalfAnHour() {
+  void handsEachResultOutOnce() {
+    var store = new ResultStore();
+    String id = store.put("find_features", List.of());
+
+    assertThat(store.take(id)).isPresent();
+    assertThat(store.take(id)).isEmpty();
+  }
+
+  @Test
+  void dropsResultsNobodyTookWithinFiveMinutes() {
     var clock = new TestClock();
     var store = new ResultStore(clock);
     String id = store.put("find_features", List.of());
 
-    clock.now = clock.now.plus(Duration.ofMinutes(29));
-    assertThat(store.get(id)).isPresent();
-    clock.now = clock.now.plus(Duration.ofMinutes(2));
-    assertThat(store.get(id)).isEmpty();
+    clock.now = clock.now.plus(Duration.ofMinutes(6));
+    assertThat(store.take(id)).isEmpty();
   }
 
   @Test
-  void keepsAtMostAThousandResults() {
+  void keepsAtMostAHundredResults() {
     var store = new ResultStore();
     String first = store.put("find_features", List.of());
     for (int i = 0; i < ResultStore.MAX_RESULTS; i++) {
       store.put("find_features", List.of());
     }
 
-    assertThat(store.get(first)).isEmpty();
+    assertThat(store.take(first)).isEmpty();
   }
 }

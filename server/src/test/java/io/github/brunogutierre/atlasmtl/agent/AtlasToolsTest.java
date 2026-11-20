@@ -65,7 +65,7 @@ class AtlasToolsTest {
 
     assertThat(result.get("total").asInt()).isEqualTo(2);
     assertThat(result.at("/examples/0/name").asString()).isEqualTo("École Alpha");
-    assertThat(store.get(result.get("resultId").asString()))
+    assertThat(store.take(result.get("resultId").asString()))
         .hasValueSatisfying(r -> assertThat(r.places()).hasSize(2));
   }
 
@@ -87,7 +87,7 @@ class AtlasToolsTest {
 
     assertThat(result.get("total").asInt()).isOne();
     assertThat(result.at("/examples/0/nearest/name").asString()).isEqualTo("Hôpital Test");
-    assertThat(store.get(result.get("resultId").asString()))
+    assertThat(store.take(result.get("resultId").asString()))
         .hasValueSatisfying(r -> assertThat(r.places()).hasSize(2)); // the school and the hospital
   }
 
