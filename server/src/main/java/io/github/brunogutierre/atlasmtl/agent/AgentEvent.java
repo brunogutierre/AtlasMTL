@@ -19,7 +19,7 @@ import tools.jackson.databind.JsonNode;
   @JsonSubTypes.Type(AgentEvent.Features.class),
   @JsonSubTypes.Type(AgentEvent.Usage.class),
   @JsonSubTypes.Type(AgentEvent.Done.class),
-  @JsonSubTypes.Type(AgentEvent.Error.class)
+  @JsonSubTypes.Type(AgentEvent.Failure.class)
 })
 public sealed interface AgentEvent {
 
@@ -47,7 +47,10 @@ public sealed interface AgentEvent {
   @JsonTypeName("done")
   record Done() implements AgentEvent {}
 
-  /** The answer stopped; the message is safe to show. */
+  /**
+   * The answer stopped; the message is safe to show. Named {@code Failure} so the generated
+   * TypeScript doesn't shadow the global {@code Error}; on the wire it is {@code "error"}.
+   */
   @JsonTypeName("error")
-  record Error(String message) implements AgentEvent {}
+  record Failure(String message) implements AgentEvent {}
 }

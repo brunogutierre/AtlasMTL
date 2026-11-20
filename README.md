@@ -73,6 +73,14 @@ Load the real open data into the local database (downloads ~60 MB; unchanged fil
 ./gradlew :ingest:bootRun --args="--only=parks --force"    # one dataset, even if unchanged
 ```
 
+The Angular client in `web/src/app/api` is generated from the Java controllers and committed; CI fails if it is stale:
+
+```bash
+./gradlew :server:generateTypeScript   # after changing a controller, an event or a DTO
+```
+
+`npx ng serve` proxies `/api` to the server on port 8080 (`web/proxy.conf.json`).
+
 Run `./gradlew spotlessApply` on its own to format Java (google-java-format) and Gradle scripts (ktlint).
 
 With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true ./gradlew build`.
@@ -84,7 +92,7 @@ With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKE
 | `build-logic/` | Convention plugins: `atlas.java` (JDK 25 toolchain, `-Werror`, Spring Boot and Spring AI BOMs, Spotless) and `atlas.spring-boot` |
 | `db/` | Flyway migrations (the schema) and a PostGIS Testcontainers fixture for tests |
 | `ingest/` | Command-line job: finds each dataset through CKAN, downloads it, normalizes it and replaces its rows; run weekly by `.github/workflows/ingest.yml` |
-| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup |
+| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup. Its `codegen` source set generates the Angular client with [RecordBridge](https://github.com/brunogutierre/RecordBridge) |
 | `web/` | Angular 22 app (zoneless, Vitest) on the Tessera design system (Enterprise theme, light/dark/system), in English and French |
 | `compose.yaml` | Local PostGIS |
 | `docs/` | [Data spike](docs/data-spike.md) and [ADRs](docs/adr/) |

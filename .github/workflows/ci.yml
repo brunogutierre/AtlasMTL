@@ -32,6 +32,11 @@ jobs:
       - name: Build and test
         run: ./gradlew build
 
+      - name: Check that the generated Angular client is up to date
+        run: |
+          ./gradlew :server:generateTypeScript
+          git diff --exit-code -- web/src/app/api
+
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7

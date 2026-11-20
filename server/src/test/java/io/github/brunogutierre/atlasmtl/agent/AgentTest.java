@@ -92,7 +92,7 @@ class AgentTest {
     List<AgentEvent> events = ask("Anything");
 
     assertThat(events)
-        .containsExactly(new AgentEvent.Usage(0, 0, 0), new AgentEvent.Error(Agent.FAILURE));
+        .containsExactly(new AgentEvent.Usage(0, 0, 0), new AgentEvent.Failure(Agent.FAILURE));
   }
 
   @Test

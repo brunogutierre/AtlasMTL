@@ -121,7 +121,7 @@ public class Agent {
         // The question itself stays out of the logs; its fingerprint links related lines.
         log.warn("An answer failed (question {})", fingerprint(question), e);
         emit.accept(usage()); // failed answers still cost tokens
-        emit.accept(new AgentEvent.Error(FAILURE));
+        emit.accept(new AgentEvent.Failure(FAILURE));
       }
     }
 
