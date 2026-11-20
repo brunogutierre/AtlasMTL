@@ -53,3 +53,10 @@ val evals by tasks.registering(Test::class) {
             .asFile.absolutePath,
     )
 }
+
+// The production jar also serves the Angular build: ./gradlew :server:bootJar -PwebDist=web/dist/web/browser
+providers.gradleProperty("webDist").orNull?.let { webDist ->
+    tasks.bootJar {
+        from(rootProject.file(webDist)) { into("BOOT-INF/classes/static") }
+    }
+}

@@ -1,0 +1,13 @@
+**/build/
+**/.gradle/
+.kotlin/
+web/node_modules/
+web/dist/
+web/.angular/
+web/test-results/
+web/playwright-report/
+manual/
+.claude/
+CLAUDE.md
+BUSINESS.md
+.git/

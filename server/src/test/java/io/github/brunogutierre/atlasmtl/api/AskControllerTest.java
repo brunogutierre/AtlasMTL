@@ -72,4 +72,16 @@ class AskControllerTest {
     assertThat(overlong.statusCode()).isEqualTo(400);
     assertThat(overlong.body()).contains("limited to 500 characters");
   }
+
+  @Test
+  void opensTheStatsPageFromALink() throws Exception {
+    var request =
+        HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/stats")).GET().build();
+
+    HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+
+    // src/test/resources/static/index.html stands in for the Angular build.
+    assertThat(response.statusCode()).isEqualTo(200);
+    assertThat(response.body()).contains("AtlasMTL test shell");
+  }
 }

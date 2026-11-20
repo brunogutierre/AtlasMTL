@@ -94,6 +94,19 @@ Run `./gradlew spotlessApply` on its own to format Java (google-java-format) and
 
 With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true ./gradlew build`.
 
+### Container
+
+One image holds the API and the Angular build (ADR 0008):
+
+```bash
+docker build -t atlasmtl .
+docker run -p 8080:8080 \
+  -e DATABASE_URL=jdbc:postgresql://host:5432/atlas -e DATABASE_USER=… -e DATABASE_PASSWORD=… \
+  -e ANTHROPIC_API_KEY=… -e ATLAS_VISITOR_KEY=… atlasmtl
+```
+
+The server trusts `X-Forwarded-For` only from proxies on private networks (`server.forward-headers-strategy: native`), so the rate limits see each visitor's real address behind the hosting proxy.
+
 ### Layout
 
 | Path | Purpose |

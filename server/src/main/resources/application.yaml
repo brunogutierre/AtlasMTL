@@ -28,6 +28,11 @@ spring:
           max-tokens: 1024
           temperature: 0.2
 
+server:
+  # Behind a proxy, take the client address from X-Forwarded-For, trusting only proxies on private
+  # networks (Tomcat's default internal proxies). The rate limits and budgets depend on it.
+  forward-headers-strategy: native
+
 management:
   endpoints:
     web:
