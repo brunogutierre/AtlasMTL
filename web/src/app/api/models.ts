@@ -12,6 +12,11 @@ export interface BoroughShape {
 export const CategoryValues = ['PARK', 'SCHOOL', 'HOSPITAL', 'CLSC', 'LONG_TERM_CARE', 'AMBULATORY_CARE'] as const;
 export type Category = (typeof CategoryValues)[number];
 
+export interface Day {
+  day: string;
+  questions: number;
+}
+
 export interface Done {
   type: 'done';
 }
@@ -52,6 +57,18 @@ export interface Question {
   text: string;
 }
 
+export interface Stats {
+  questions: number;
+  lastSevenDays: number;
+  cachedShare: number;
+  averageCostUsd: number;
+  medianLatencyMs: number;
+  p95LatencyMs: number;
+  averageToolCalls: number;
+  tools: ToolUse[];
+  days: Day[];
+}
+
 export interface Token {
   type: 'token';
   text: string;
@@ -69,6 +86,11 @@ export interface ToolResult {
   id: string;
   tool: string;
   result: unknown;
+}
+
+export interface ToolUse {
+  tool: string;
+  calls: number;
 }
 
 export interface Usage {
