@@ -8,6 +8,10 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/atlas}
     username: ${DATABASE_USER:atlas}
     password: ${DATABASE_PASSWORD:atlas}
+  mvc:
+    async:
+      # An answer with several tool calls can take a while; the agent stops at 6 calls.
+      request-timeout: 2m
   ai:
     model:
       chat: anthropic

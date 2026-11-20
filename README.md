@@ -50,12 +50,21 @@ Requirements: JDK 17+ to run Gradle (the build provisions a JDK 25 toolchain), N
 ```bash
 docker compose up -d            # local PostGIS (postgis/postgis:17-3.5) on port 5432
 ./gradlew build                 # server: compile, format check, tests (Testcontainers starts its own PostGIS)
-./gradlew :server:bootRun       # API on http://localhost:8080 (health: /actuator/health)
+ANTHROPIC_API_KEY=… ./gradlew :server:bootRun   # API on http://localhost:8080 (health: /actuator/health)
 
 cd web && npm ci
 npx ng serve                    # Angular dev server on http://localhost:4200
 npx ng test --watch=false       # Vitest
 ```
+
+Ask a question from the command line (the answer streams as server-sent events):
+
+```bash
+curl -N -X POST localhost:8080/api/ask -H 'Content-Type: application/json' \
+  -d '{"text": "Schools within 1 km of a hospital in Rosemont?"}'
+```
+
+Without `ANTHROPIC_API_KEY` the server still starts, and answers end with an `error` event. `ATLAS_MODEL` picks another Claude model.
 
 Load the real open data into the local database (downloads ~60 MB; unchanged files are skipped on the next run):
 

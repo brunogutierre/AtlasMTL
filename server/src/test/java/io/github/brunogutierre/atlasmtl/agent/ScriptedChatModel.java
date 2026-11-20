@@ -17,25 +17,25 @@ import reactor.core.publisher.Flux;
  * A model that plays back scripted turns, so the agent loop is tested without an API key or any
  * randomness. Each turn streams its text in pieces, then its tool calls, then usage.
  */
-class ScriptedChatModel implements ChatModel {
+public class ScriptedChatModel implements ChatModel {
 
-  record Turn(List<String> text, List<AssistantMessage.ToolCall> toolCalls) {
-    static Turn text(String... pieces) {
+  public record Turn(List<String> text, List<AssistantMessage.ToolCall> toolCalls) {
+    public static Turn text(String... pieces) {
       return new Turn(List.of(pieces), List.of());
     }
 
-    static Turn call(String tool, String arguments) {
+    public static Turn call(String tool, String arguments) {
       return new Turn(
           List.of(),
           List.of(new AssistantMessage.ToolCall("call-" + tool, "function", tool, arguments)));
     }
   }
 
-  final Deque<Turn> script = new ConcurrentLinkedDeque<>();
-  final List<Prompt> prompts = new ArrayList<>();
-  RuntimeException failure;
+  public final Deque<Turn> script = new ConcurrentLinkedDeque<>();
+  public final List<Prompt> prompts = new ArrayList<>();
+  public RuntimeException failure;
 
-  void play(Turn... turns) {
+  public void play(Turn... turns) {
     script.clear();
     prompts.clear();
     failure = null;
