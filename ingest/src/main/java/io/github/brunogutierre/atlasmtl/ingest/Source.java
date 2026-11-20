@@ -52,6 +52,36 @@ public record Source(
           "CSV",
           "");
 
+  public static final Source HEALTH =
+      new Source(
+          "health",
+          "Installations du réseau de la santé et des services sociaux (M02)",
+          "Ministère de la Santé et des Services sociaux",
+          QUEBEC,
+          "fichiers-cartographiques-m02-des-installations-et-etablissements",
+          "CSV",
+          "installations");
+
+  public static final Source PUBLIC_SCHOOLS =
+      new Source(
+          "public-schools",
+          "Localisation des établissements d'enseignement : écoles publiques",
+          "Ministère de l'Éducation",
+          QUEBEC,
+          "localisation-des-etablissements-d-enseignement-du-reseau-scolaire-au-quebec",
+          "GeoJSON",
+          "coles publiques");
+
+  public static final Source PRIVATE_SCHOOLS =
+      new Source(
+          "private-schools",
+          "Localisation des établissements d'enseignement : établissements privés",
+          "Ministère de l'Éducation",
+          QUEBEC,
+          "localisation-des-etablissements-d-enseignement-du-reseau-scolaire-au-quebec",
+          "GeoJSON",
+          "tablissements privés");
+
   /** Every source is published under this license. */
   public static final String LICENSE = "CC-BY-4.0";
 
