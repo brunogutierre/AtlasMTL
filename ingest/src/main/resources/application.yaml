@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: atlasmtl-ingest
+  main:
+    web-application-type: none
+    banner-mode: off
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/atlas}
+    username: ${DATABASE_USER:atlas}
+    password: ${DATABASE_PASSWORD:atlas}

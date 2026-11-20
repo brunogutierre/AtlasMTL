@@ -57,6 +57,13 @@ npx ng serve                    # Angular dev server on http://localhost:4200
 npx ng test --watch=false       # Vitest
 ```
 
+Load the real open data into the local database (downloads ~60 MB; unchanged files are skipped on the next run):
+
+```bash
+./gradlew :ingest:bootRun                                  # every dataset
+./gradlew :ingest:bootRun --args="--only=parks --force"    # one dataset, even if unchanged
+```
+
 Run `./gradlew spotlessApply` on its own to format Java (google-java-format) and Gradle scripts (ktlint).
 
 With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true ./gradlew build`.
@@ -67,7 +74,7 @@ With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKE
 |---|---|
 | `build-logic/` | Convention plugins: `atlas.java` (JDK 25 toolchain, `-Werror`, Spring Boot and Spring AI BOMs, Spotless) and `atlas.spring-boot` |
 | `db/` | Flyway migrations (the schema) and a PostGIS Testcontainers fixture for tests |
-| `ingest/` | Reads the open datasets and normalizes them into the schema's rows (loading and the weekly job arrive next) |
+| `ingest/` | Command-line job: finds each dataset through CKAN, downloads it, normalizes it and replaces its rows; run weekly by `.github/workflows/ingest.yml` |
 | `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup |
 | `web/` | Angular 22 app (zoneless, Vitest) |
 | `compose.yaml` | Local PostGIS |
