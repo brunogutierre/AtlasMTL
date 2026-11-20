@@ -22,7 +22,7 @@ Show an end-to-end LLM feature built the way production teams need it:
 | Frontend | Angular 22 (signals, zoneless), [Tessera](https://github.com/brunogutierre/Tessera) design system, Transloco EN/FR |
 | Map | MapLibre GL JS + OpenFreeMap tiles |
 | API contract | [RecordBridge](https://github.com/brunogutierre/RecordBridge) generates the Angular client and event types |
-| Tests | JUnit 5, Testcontainers PostGIS, stub `ChatModel`, eval suite, Vitest, Playwright + axe |
+| Tests | JUnit 6, Testcontainers PostGIS, stub `ChatModel`, eval suite, Vitest, Playwright + axe |
 | Deploy | One container on Render, Neon (PostGIS) |
 
 ## Architecture (planned)
@@ -45,7 +45,31 @@ Five CC-BY 4.0 datasets from [donnees.montreal.ca](https://donnees.montreal.ca) 
 
 ## How to run and test
 
-There is no code yet. This section is filled in as the milestones land.
+Requirements: JDK 17+ to run Gradle (the build provisions a JDK 25 toolchain), Node 24, and Docker or Podman.
+
+```bash
+docker compose up -d            # local PostGIS (postgis/postgis:17-3.5) on port 5432
+./gradlew build                 # server: compile, format check, tests (Testcontainers starts its own PostGIS)
+./gradlew :server:bootRun       # API on http://localhost:8080 (health: /actuator/health)
+
+cd web && npm ci
+npx ng serve                    # Angular dev server on http://localhost:4200
+npx ng test --watch=false       # Vitest
+```
+
+Run `./gradlew spotlessApply` on its own to format Java (google-java-format) and Gradle scripts (ktlint).
+
+With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock TESTCONTAINERS_RYUK_DISABLED=true ./gradlew build`.
+
+### Layout
+
+| Path | Purpose |
+|---|---|
+| `build-logic/` | Convention plugins: `atlas.java` (JDK 25 toolchain, `-Werror`, Spring Boot and Spring AI BOMs, Spotless) and `atlas.spring-boot` |
+| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads) |
+| `web/` | Angular 22 app (zoneless, Vitest) |
+| `compose.yaml` | Local PostGIS |
+| `docs/` | [Data spike](docs/data-spike.md) and [ADRs](docs/adr/) |
 
 ## License
 
