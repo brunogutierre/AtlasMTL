@@ -1,0 +1,13 @@
+[versions]
+spring-boot = "4.1.3"
+spring-ai = "2.0.3"
+spotless = "8.11.0"
+
+[libraries]
+spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+spring-ai-bom = { module = "org.springframework.ai:spring-ai-bom", version.ref = "spring-ai" }
+spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+spring-boot-gradle = { module = "org.springframework.boot:spring-boot-gradle-plugin", version.ref = "spring-boot" }
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
