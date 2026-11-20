@@ -20,6 +20,7 @@ public class GeoQueries {
 
   public static final int MAX_LIMIT = 500;
   public static final int MAX_METERS = 5_000;
+  public static final int MAX_HECTARES = 1_000;
 
   /** The columns of a {@link Place}, for a feature aliased {@code f} and its point {@code p}. */
   private static final String PLACE =
@@ -50,12 +51,32 @@ public class GeoQueries {
    */
   public Found<Place> find(
       Category category, @Nullable Borough borough, @Nullable Near near, int limit) {
+    return find(category, borough, near, null, limit);
+  }
+
+  /**
+   * The same, keeping only places of at least {@code minHectares}, measured on the geography: the
+   * source's own area field is parks-only.
+   */
+  public Found<Place> find(
+      Category category,
+      @Nullable Borough borough,
+      @Nullable Near near,
+      @Nullable Double minHectares,
+      int limit) {
     checkLimit(limit);
     var sql = new StringBuilder("select ").append(PLACE).append(", count(*) over () as total");
     sql.append(" from feature f cross join lateral st_pointonsurface(f.geom) as p");
     sql.append(" where f.category = :category");
     if (borough != null) {
       sql.append(" and ").append(IN_BOROUGH);
+    }
+    if (minHectares != null) {
+      if (minHectares <= 0 || minHectares > MAX_HECTARES) {
+        throw new IllegalArgumentException(
+            "minHectares must be above 0 and at most " + MAX_HECTARES);
+      }
+      sql.append(" and st_area(f.geom::geography) >= :minArea");
     }
     if (near != null) {
       checkMeters(near.meters());
@@ -68,6 +89,9 @@ public class GeoQueries {
     var query = jdbc.sql(sql.toString()).param("category", category.id()).param("limit", limit);
     if (borough != null) {
       query = query.param("borough", borough.id());
+    }
+    if (minHectares != null) {
+      query = query.param("minArea", minHectares * 10_000);
     }
     if (near != null) {
       query =

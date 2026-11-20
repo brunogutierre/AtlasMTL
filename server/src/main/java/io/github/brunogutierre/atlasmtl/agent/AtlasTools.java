@@ -77,8 +77,18 @@ public class AtlasTools {
           @Nullable Double nearLatitude,
       @ToolParam(required = false, description = "Search radius in meters, 1 to 5000")
           @Nullable Integer radiusMeters,
+      @ToolParam(
+              required = false,
+              description = "Only places of at least this many hectares, such as large parks")
+          @Nullable Double minAreaHectares,
       @ToolParam(required = false, description = "Most places to return, 1 to 500 (default 50)")
           @Nullable Integer limit) {
+    if (minAreaHectares != null
+        && (minAreaHectares <= 0 || minAreaHectares > GeoQueries.MAX_HECTARES)) {
+      return new ToolResults.Error(
+          "minAreaHectares is " + minAreaHectares + ", outside 0 to " + GeoQueries.MAX_HECTARES,
+          "Retry with a positive area of at most " + GeoQueries.MAX_HECTARES + " hectares.");
+    }
     Borough area = null;
     if (borough != null) {
       area = geo.borough(borough).orElse(null);
@@ -102,7 +112,7 @@ public class AtlasTools {
     if (max < 1 || max > GeoQueries.MAX_LIMIT) {
       return outOfRange("limit", max, 1, GeoQueries.MAX_LIMIT);
     }
-    Found<Place> found = geo.find(category, area, near, max);
+    Found<Place> found = geo.find(category, area, near, minAreaHectares, max);
     String id = store.put("find_features", found.places());
     return new ToolResults.Places(
         id,

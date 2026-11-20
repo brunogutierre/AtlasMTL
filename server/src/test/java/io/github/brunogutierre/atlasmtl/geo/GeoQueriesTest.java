@@ -45,6 +45,16 @@ class GeoQueriesTest {
   }
 
   @Test
+  void keepsPlacesOfAMinimumArea() {
+    // In the fixture, Parc Carré covers 3.47 ha and Parc Frontière 20.84 ha.
+    var all = geo.find(Category.PARK, null, null, null, 10).places();
+    var large = geo.find(Category.PARK, null, null, 10.0, 10).places();
+
+    assertThat(all).hasSize(2);
+    assertThat(large).extracting(Place::name).containsExactly("Parc Frontière");
+  }
+
+  @Test
   void reportsTheTotalBeyondTheLimit() {
     Found<Place> found = geo.find(Category.SCHOOL, null, null, 1);
 
