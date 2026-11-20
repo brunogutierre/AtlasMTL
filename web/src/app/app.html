@@ -1,4 +1,43 @@
-<main>
-  <h1>AtlasMTL</h1>
-  <p>Ask questions about Montreal in plain language and see the answer on a map.</p>
+<header class="top">
+  <div class="brand">
+    <h1>AtlasMTL</h1>
+    <p>{{ i18n.t().tagline }}</p>
+  </div>
+  <nav class="settings">
+    <div role="group" [attr.aria-label]="i18n.t().theme">
+      @for (mode of modes; track mode) {
+        <button
+          tes-button
+          variant="ghost"
+          size="sm"
+          type="button"
+          [attr.aria-pressed]="theme.mode() === mode"
+          (click)="theme.mode.set(mode)"
+        >
+          {{ i18n.t().modes[mode] }}
+        </button>
+      }
+    </div>
+    <button
+      tes-button
+      variant="outline"
+      size="sm"
+      type="button"
+      [attr.lang]="i18n.language() === 'en' ? 'fr' : 'en'"
+      (click)="i18n.toggle()"
+    >
+      {{ i18n.t().switchTo }}
+    </button>
+  </nav>
+</header>
+
+<main class="layout">
+  <section tes-card class="chat" aria-labelledby="chat-title">
+    <h2 id="chat-title">{{ i18n.t().chat.title }}</h2>
+  </section>
+  <section class="map" role="region" [attr.aria-label]="i18n.t().map.label"></section>
 </main>
+
+<footer class="attribution">
+  <strong>{{ i18n.t().sources }}</strong> · {{ i18n.t().attribution }}
+</footer>

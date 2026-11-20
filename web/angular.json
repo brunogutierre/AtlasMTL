@@ -25,6 +25,7 @@
               }
             ],
             "styles": [
+              "node_modules/@brunogutierre/tessera/styles/tessera.css",
               "src/styles.css"
             ]
           },
