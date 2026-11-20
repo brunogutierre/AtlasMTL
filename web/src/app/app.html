@@ -37,7 +37,12 @@
     <app-chat-panel />
   </section>
   <section class="map" role="region" [attr.aria-label]="i18n.t().map.label">
-    <app-map-view [places]="places()" [boroughs]="boroughs.hasValue() ? boroughs.value() : []" />
+    <app-map-view
+      [places]="session.places()"
+      [boroughs]="boroughs.hasValue() ? boroughs.value() : []"
+      [selected]="session.selected()"
+      (selectedChange)="session.selected.set($event)"
+    />
   </section>
 </main>
 

@@ -7,6 +7,10 @@ export interface MapHandle {
   show(layers: MapLayers): void;
   fit(bounds: [[number, number], [number, number]]): void;
   setStyle(url: string): void;
+  /** Highlights one place (or none) and, with a center, brings it into view. */
+  select(id: number | null, center?: [number, number]): void;
+  /** Called with the place clicked on the map. */
+  onSelect(listener: (id: number) => void): void;
   destroy(): void;
 }
 
@@ -32,6 +36,8 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
   // A fit asked for before MapLibre finished loading is applied once the map exists.
   let pendingFit: [[number, number], [number, number]] | null = null;
   let currentStyle = styleUrl;
+  let selected: number | null = null;
+  let selectListener: ((id: number) => void) | null = null;
 
   const apply = (layers: MapLayers) => {
     if (!map || !styleReady) {
@@ -60,20 +66,28 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
         type: 'fill',
         source: 'places',
         filter: ['==', ['geometry-type'], 'Polygon'],
-        paint: { 'fill-opacity': 0.35 },
+        paint: {
+          'fill-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.65, 0.35],
+        },
       });
       map.addLayer({
         id: 'places-point',
         type: 'circle',
         source: 'places',
         filter: ['==', ['geometry-type'], 'Point'],
-        paint: { 'circle-radius': 6, 'circle-stroke-width': 1.5 },
+        paint: {
+          'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], 10, 6],
+          'circle-stroke-width': 1.5,
+        },
       });
     }
     map.setPaintProperty('boroughs-line', 'line-color', layers.colors.boroughs);
     map.setPaintProperty('places-fill', 'fill-color', layers.colors.places);
     map.setPaintProperty('places-point', 'circle-color', layers.colors.places);
     map.setPaintProperty('places-point', 'circle-stroke-color', layers.colors.outline);
+    if (selected !== null) {
+      map.setFeatureState({ source: 'places', id: selected }, { selected: true });
+    }
   };
 
   void import('maplibre-gl').then(({ Map, setWorkerUrl }) => {
@@ -84,6 +98,16 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
     setWorkerUrl(new URL('maplibre-gl-worker.mjs', container.ownerDocument.baseURI).href);
     map = new Map({ container, style: currentStyle, bounds: pendingFit ?? [-73.98, 45.41, -73.47, 45.7] });
     // A new style drops every source and layer, so they are added again after each load.
+    for (const layer of ['places-point', 'places-fill']) {
+      map.on('click', layer, (event) => {
+        const id = event.features?.[0]?.id;
+        if (typeof id === 'number') {
+          selectListener?.(id);
+        }
+      });
+      map.on('mouseenter', layer, () => (map!.getCanvas().style.cursor = 'pointer'));
+      map.on('mouseleave', layer, () => (map!.getCanvas().style.cursor = ''));
+    }
     map.on('style.load', () => {
       styleReady = true;
       if (pending) {
@@ -114,6 +138,23 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
         styleReady = false;
         map.setStyle(url);
       }
+    },
+    select(id, center) {
+      if (map && styleReady && map.getSource('places')) {
+        if (selected !== null) {
+          map.setFeatureState({ source: 'places', id: selected }, { selected: false });
+        }
+        if (id !== null) {
+          map.setFeatureState({ source: 'places', id }, { selected: true });
+        }
+      }
+      selected = id;
+      if (map && center) {
+        map.easeTo({ center, zoom: Math.max(map.getZoom(), 14), duration: 600 });
+      }
+    },
+    onSelect(listener) {
+      selectListener = listener;
     },
     destroy() {
       destroyed = true;
