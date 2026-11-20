@@ -41,3 +41,8 @@ atlas:
     output-usd-per-million: ${ATLAS_OUTPUT_USD_PER_MILLION:5}
     # Keys the visitor hashes; set it in production so ids survive restarts.
     visitor-key: ${ATLAS_VISITOR_KEY:}
+  limits:
+    questions-per-minute: ${ATLAS_QUESTIONS_PER_MINUTE:5}
+    visitor-daily-tokens: ${ATLAS_VISITOR_DAILY_TOKENS:60000}
+    # Estimated USD per day for everyone; past it, only cached answers are served.
+    global-daily-usd: ${ATLAS_GLOBAL_DAILY_USD:2.00}

@@ -18,6 +18,8 @@ export interface Exchange {
   status: 'streaming' | 'done' | 'error';
   /** The server's explanation of a failure, when it gave one. */
   error?: string;
+  /** A known reason the server refused the question, such as a reached limit. */
+  errorCode?: string;
   steps: Step[];
   usage?: Usage;
 }
@@ -48,7 +50,10 @@ export class ChatSession {
     this.selected.set(null);
     this.subscription = this.api.ask({ text }).subscribe({
       next: (event) => this.apply(event),
-      error: (error: unknown) => this.update({ status: 'error', error: problemDetail(error) }),
+      error: (error: unknown) => {
+        const problem = problemDetail(error);
+        this.update({ status: 'error', error: problem?.detail, errorCode: problem?.code });
+      },
       complete: () => {
         // A stream that ends without "done" or "error" was cut off.
         if (this.exchanges().at(-1)?.status === 'streaming') {
@@ -115,10 +120,10 @@ export class ChatSession {
 }
 
 /**
- * The `detail` of a ProblemDetail error. The stream is read as text, so the error body arrives as
- * a JSON string rather than an object.
+ * The `detail` and `code` of a ProblemDetail error. The stream is read as text, so the error body
+ * arrives as a JSON string rather than an object.
  */
-function problemDetail(error: unknown): string | undefined {
+function problemDetail(error: unknown): { detail?: string; code?: string } | undefined {
   if (!(error instanceof HttpErrorResponse) || error.status === 0) {
     return undefined;
   }
@@ -130,6 +135,9 @@ function problemDetail(error: unknown): string | undefined {
       return undefined;
     }
   }
-  const detail = (body as { detail?: unknown } | null)?.detail;
-  return typeof detail === 'string' ? detail : undefined;
+  const { detail, code } = (body ?? {}) as { detail?: unknown; code?: unknown };
+  return {
+    detail: typeof detail === 'string' ? detail : undefined,
+    code: typeof code === 'string' ? code : undefined,
+  };
 }

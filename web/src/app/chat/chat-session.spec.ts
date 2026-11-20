@@ -77,6 +77,18 @@ describe('ChatSession', () => {
     });
   });
 
+  it('keeps the code of a refused question for a translated message', () => {
+    session.ask('x');
+    stream.error(
+      new HttpErrorResponse({
+        status: 429,
+        error: JSON.stringify({ title: 'Limit reached', detail: 'Too many questions.', code: 'rate_limited' }),
+      }),
+    );
+
+    expect(session.exchanges()[0].errorCode).toBe('rate_limited');
+  });
+
   it('reports an error event and a stream cut off before the end', () => {
     session.ask('first');
     stream.next({ type: 'error', message: 'The assistant couldn’t answer.' });
