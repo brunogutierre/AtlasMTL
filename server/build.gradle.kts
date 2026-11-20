@@ -1,5 +1,6 @@
 plugins {
     id("atlas.spring-boot")
+    alias(libs.plugins.recordbridge)
 }
 
 dependencies {
@@ -18,29 +19,9 @@ dependencies {
 }
 
 // Generates the Angular API client and event types from the compiled controllers with
-// RecordBridge (docs/adr/0003-sse-agent-events.md). Until its Gradle plugin is approved on the
-// Plugin Portal, a small main class calls the generator library from Maven Central.
-val codegen =
-    sourceSets.create("codegen") {
-        compileClasspath += sourceSets.main.get().output + configurations.runtimeClasspath.get()
-        runtimeClasspath += sourceSets.main.get().output + configurations.runtimeClasspath.get()
-    }
-
-dependencies {
-    "codegenImplementation"(libs.recordbridge.generator)
-}
-
-tasks.register<JavaExec>("generateTypeScript") {
-    group = "build"
-    description = "Writes the Angular API client to web/src/app/api."
-    classpath = codegen.runtimeClasspath
-    mainClass = "io.github.brunogutierre.atlasmtl.codegen.GenerateApi"
-    args(
-        rootProject.layout.projectDirectory
-            .dir("web/src/app/api")
-            .asFile.absolutePath,
-        sourceSets.main
-            .get()
-            .output.classesDirs.asPath,
-    )
+// RecordBridge (docs/adr/0003-sse-agent-events.md): ./gradlew :server:generateTypeScript
+recordBridge {
+    basePackages = listOf("io.github.brunogutierre.atlasmtl.api")
+    outputDir = rootProject.file("web/src/app/api")
+    unmarkedNullness = "NON_NULL"
 }

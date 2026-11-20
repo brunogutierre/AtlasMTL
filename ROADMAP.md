@@ -92,7 +92,7 @@ See [ADR 0004](docs/adr/0004-one-feature-table-explicit-sql.md).
 7. `feat(geo)`: geocoder and borough lookup
 8. `feat(agent)`: tools, argument guards, result store
 9. `feat(agent)`: orchestration plus SSE `AgentEvent` stream (stub-LLM tests)
-10. `chore(api)`: RecordBridge generation wired into the build (through the generator library until its Gradle plugin is approved on the Plugin Portal)
+10. `chore(api)`: RecordBridge generation wired into the build (its Gradle plugin)
 
 ### M3: Web
 11. `feat(web)`: app shell, Tessera theme, EN/FR

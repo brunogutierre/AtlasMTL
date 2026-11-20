@@ -92,7 +92,7 @@ With Podman instead of Docker, point Testcontainers at the Podman socket: `DOCKE
 | `build-logic/` | Convention plugins: `atlas.java` (JDK 25 toolchain, `-Werror`, Spring Boot and Spring AI BOMs, Spotless) and `atlas.spring-boot` |
 | `db/` | Flyway migrations (the schema) and a PostGIS Testcontainers fixture for tests |
 | `ingest/` | Command-line job: finds each dataset through CKAN, downloads it, normalizes it and replaces its rows; run weekly by `.github/workflows/ingest.yml` |
-| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup. Its `codegen` source set generates the Angular client with [RecordBridge](https://github.com/brunogutierre/RecordBridge) |
+| `server/` | Spring Boot 4.1 application (Spring MVC on virtual threads); applies the migrations on startup. The [RecordBridge](https://github.com/brunogutierre/RecordBridge) Gradle plugin generates the Angular client from it |
 | `web/` | Angular 22 app (zoneless, Vitest) on the Tessera design system (Enterprise theme, light/dark/system), in English and French |
 | `compose.yaml` | Local PostGIS |
 | `docs/` | [Data spike](docs/data-spike.md) and [ADRs](docs/adr/) |
