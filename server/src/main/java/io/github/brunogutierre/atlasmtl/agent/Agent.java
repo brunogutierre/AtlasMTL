@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -207,8 +206,20 @@ public class Agent {
     }
   }
 
+  /**
+   * The model's configured defaults (model name, max tokens, temperature) plus the tools. Options
+   * passed with a prompt replace the defaults rather than adding to them, so they must start from a
+   * copy of the defaults: a bare {@code ToolCallingChatOptions} sent the provider's default model
+   * and no tool definitions at all.
+   */
+  private ToolCallingChatOptions.Builder<?> defaults() {
+    return model.getOptions() instanceof ToolCallingChatOptions options
+        ? options.mutate()
+        : ToolCallingChatOptions.builder();
+  }
+
   private ChatOptions options() {
-    return ToolCallingChatOptions.builder().toolCallbacks(tools).build();
+    return defaults().toolCallbacks(tools).build();
   }
 
   /**
@@ -216,8 +227,9 @@ public class Agent {
    * definitions, so the tools stay defined and {@code tool_choice: none} forbids using them.
    */
   private ChatOptions finalOptions() {
-    if (model instanceof AnthropicChatModel) {
-      return AnthropicChatOptions.builder()
+    if (model.getOptions() instanceof AnthropicChatOptions anthropic) {
+      return anthropic
+          .mutate()
           .toolCallbacks(tools)
           .toolChoice(ToolChoice.ofNone(ToolChoiceNone.builder().build()))
           .build();
