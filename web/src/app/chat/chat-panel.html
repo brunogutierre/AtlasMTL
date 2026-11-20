@@ -1,0 +1,46 @@
+<ol class="conversation" [attr.aria-label]="i18n.t().chat.conversation">
+  @for (exchange of session.exchanges(); track $index; let last = $last) {
+    <li class="exchange">
+      <p class="question">{{ exchange.question }}</p>
+      <div class="answer" [attr.aria-live]="last ? 'polite' : null" [attr.aria-busy]="exchange.status === 'streaming'">
+        @if (exchange.answer) {
+          <p>{{ exchange.answer }}</p>
+        } @else if (exchange.status === 'streaming') {
+          <p class="thinking">{{ i18n.t().chat.thinking }}</p>
+        }
+      </div>
+      @if (exchange.status === 'error') {
+        <tes-alert tone="danger" live="assertive">
+          {{ exchange.error ?? i18n.t().chat.failed }}
+        </tes-alert>
+      }
+    </li>
+  } @empty {
+    <li class="empty">{{ i18n.t().chat.empty }}</li>
+  }
+</ol>
+
+<form class="ask" (submit)="submit($event)">
+  <tes-form-field [label]="i18n.t().chat.label" [hint]="i18n.t().chat.hint">
+    <textarea
+      #question
+      tes-input
+      rows="2"
+      [attr.maxlength]="maxLength"
+      [placeholder]="i18n.t().chat.placeholder"
+      [value]="draft()"
+      (input)="draft.set($any($event.target).value)"
+      (keydown)="onKeydown($event)"
+    ></textarea>
+  </tes-form-field>
+  <div class="actions">
+    @if (session.busy()) {
+      <button tes-button variant="secondary" type="button" (click)="session.stop()">
+        {{ i18n.t().chat.stop }}
+      </button>
+    }
+    <button tes-button variant="primary" type="submit" [loading]="session.busy()">
+      {{ i18n.t().chat.ask }}
+    </button>
+  </div>
+</form>

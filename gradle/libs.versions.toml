@@ -2,7 +2,7 @@
 spring-boot = "4.1.3"
 spring-ai = "2.0.3"
 spotless = "8.11.0"
-recordbridge = "0.1.0"
+recordbridge = "0.1.1"
 
 [libraries]
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
