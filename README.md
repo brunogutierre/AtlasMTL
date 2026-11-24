@@ -65,7 +65,7 @@ The model sees a short summary of each result. The full GeoJSON goes to the map 
 | API contract | [RecordBridge](https://github.com/brunogutierre/RecordBridge) Gradle plugin |
 | Cost controls | Bucket4j rate limits, budgets from the usage log, answer cache |
 | Tests | JUnit 6, Testcontainers PostGIS, scripted and recorded-stream model tests, golden-question evals, Vitest, Playwright + axe |
-| Deploy | One container (Render) + managed PostGIS (Neon) |
+| Deploy | One container (Render free tier: sleeps when idle, about a minute to wake up) + managed PostGIS (Neon) |
 
 ## Data sources
 

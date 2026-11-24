@@ -5,7 +5,9 @@ services:
     name: atlasmtl
     runtime: docker
     region: virginia # next to Neon's aws-us-east-1
-    plan: starter # 0.5 CPU, 512 MB, never sleeps
+    # Free: 512 MB, sleeps after 15 minutes without traffic and takes about a minute to wake up.
+    # Switch to starter (paid, never sleeps) in the dashboard or here, with no code change.
+    plan: free
     healthCheckPath: /actuator/health
     autoDeploy: true
     envVars:
@@ -23,5 +25,9 @@ services:
         sync: false
       - key: ATLAS_VISITOR_KEY
         generateValue: true
+      # Small footprint for the free instance's 0.1 CPU: serial GC, smaller thread stacks and code
+      # cache, and C1 only, which starts faster. The heap size stays in the Dockerfile.
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:+UseSerialGC -Xss512k -XX:ReservedCodeCacheSize=48m -XX:TieredStopAtLevel=1
       - key: ATLAS_GLOBAL_DAILY_USD
         value: "2.00"

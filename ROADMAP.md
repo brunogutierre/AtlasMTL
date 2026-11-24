@@ -31,7 +31,7 @@ AtlasMTL is a natural-language geospatial assistant over Montreal open data. A v
 | Geocoding | Local Montreal address dataset with a `pg_trgm` index | Free, no usage-policy issues, fast | Public Nominatim (usage policy), paid geocoders |
 | Map | MapLibre GL JS + OpenFreeMap tiles; colors from Tessera tokens | Vector tiles, handles large GeoJSON, no API key | Leaflet (raster-first), Mapbox (key, pricing), OpenLayers (heavier API) |
 | Auth | None. The demo is public, and ingest runs only in CI | Nothing to protect, fewer moving parts | Bring-your-own API key (liability of handling other people's keys) |
-| Hosting | One container (Spring serves the Angular build) on Render Starter + Neon free tier (PostGIS) | No cold starts, ~US$7/month, Neon branches for CI | Render free (cold starts ruin the demo), Supabase free (pauses idle projects) |
+| Hosting | One container (Spring serves the Angular build) on Render free + Neon free tier (PostGIS) | No cost while idle, Neon branches for CI; Render Starter is a one-line upgrade if cold starts hurt | Render Starter now (~US$7/month for a mostly idle demo), Supabase free (pauses idle projects) |
 
 ### Data model
 
