@@ -21,6 +21,23 @@ const en = {
     failed: 'The assistant couldn’t answer. Please try again.',
   },
   map: { label: 'Map of the answer' },
+  trace: {
+    summary: (steps: number) => `How I found it (${steps} ${steps === 1 ? 'step' : 'steps'})`,
+    found: (total: number) => `${total} found`,
+    failed: 'failed',
+    tools: {
+      describe_categories: 'Listed the kinds of places',
+      find_features: 'Searched for places',
+      within_distance: 'Looked for places near others',
+      count_by_borough: 'Counted per borough',
+      geocode: 'Located an address',
+      get_borough: 'Looked up a borough',
+    } as Record<string, string>,
+  },
+  results: {
+    heading: (count: number) => `On the map (${count})`,
+    show: 'Show on the map',
+  },
   sources: 'Data',
   attribution:
     'Open data under CC BY 4.0 from the Ville de Montréal, the Ministère de la Santé et des Services sociaux and the Ministère de l’Éducation du Québec.',
@@ -48,6 +65,23 @@ const fr: Messages = {
     failed: 'L’assistant n’a pas pu répondre. Veuillez réessayer.',
   },
   map: { label: 'Carte de la réponse' },
+  trace: {
+    summary: (steps: number) => `Comment je l’ai trouvé (${steps} étape${steps === 1 ? '' : 's'})`,
+    found: (total: number) => `${total} trouvé${total === 1 ? '' : 's'}`,
+    failed: 'échec',
+    tools: {
+      describe_categories: 'Liste des types de lieux',
+      find_features: 'Recherche de lieux',
+      within_distance: 'Lieux proches d’autres lieux',
+      count_by_borough: 'Décompte par arrondissement',
+      geocode: 'Localisation d’une adresse',
+      get_borough: 'Recherche d’un arrondissement',
+    },
+  },
+  results: {
+    heading: (count: number) => `Sur la carte (${count})`,
+    show: 'Voir sur la carte',
+  },
   sources: 'Données',
   attribution:
     'Données ouvertes sous licence CC BY 4.0 de la Ville de Montréal, du ministère de la Santé et des Services sociaux et du ministère de l’Éducation du Québec.',

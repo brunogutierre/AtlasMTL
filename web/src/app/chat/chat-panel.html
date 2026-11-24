@@ -9,6 +9,23 @@
           <p class="thinking">{{ i18n.t().chat.thinking }}</p>
         }
       </div>
+      @if (exchange.steps.length > 0) {
+        <details class="trace">
+          <summary>{{ i18n.t().trace.summary(exchange.steps.length) }}</summary>
+          <ol>
+            @for (step of exchange.steps; track step.id) {
+              @let line = describe(step);
+              <li>
+                <strong>{{ line.tool }}</strong>
+                @if (line.arguments) {
+                  {{ ' ' }}<code>{{ line.arguments }}</code>
+                }
+                → {{ line.outcome }}
+              </li>
+            }
+          </ol>
+        </details>
+      }
       @if (exchange.status === 'error') {
         <tes-alert tone="danger" live="assertive">
           {{ exchange.error ?? i18n.t().chat.failed }}
@@ -19,6 +36,30 @@
     <li class="empty">{{ i18n.t().chat.empty }}</li>
   }
 </ol>
+
+@if (session.places().length > 0) {
+  <section class="results" aria-labelledby="results-heading">
+    <h3 id="results-heading">{{ i18n.t().results.heading(session.places().length) }}</h3>
+    <ul>
+      @for (place of session.places(); track place.id) {
+        <li>
+          <button
+            type="button"
+            class="result"
+            [attr.aria-pressed]="session.selected() === place.id"
+            [attr.aria-label]="i18n.t().results.show + ': ' + (place.name ?? place.category)"
+            (click)="session.selected.set(place.id)"
+          >
+            <span class="name">{{ place.name ?? place.category }}</span>
+            @if (place.borough) {
+              <span class="borough">{{ place.borough }}</span>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+}
 
 <form class="ask" (submit)="submit($event)">
   <tes-form-field [label]="i18n.t().chat.label" [hint]="i18n.t().chat.hint">

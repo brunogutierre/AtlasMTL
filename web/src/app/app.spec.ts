@@ -6,7 +6,14 @@ import { App } from './app';
 import { I18n } from './i18n';
 import { MAP_ENGINE, type MapHandle } from './map/map-engine';
 
-const noMap: MapHandle = { show() {}, fit() {}, setStyle() {}, destroy() {} };
+const noMap: MapHandle = {
+  show() {},
+  fit() {},
+  setStyle() {},
+  select() {},
+  onSelect() {},
+  destroy() {},
+};
 
 describe('App', () => {
   beforeEach(() => {

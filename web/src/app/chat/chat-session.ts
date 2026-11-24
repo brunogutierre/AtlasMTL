@@ -33,6 +33,8 @@ export class ChatSession {
 
   readonly exchanges = signal<readonly Exchange[]>([]);
   readonly places = signal<readonly Place[]>([]);
+  /** The place highlighted in the list and on the map. */
+  readonly selected = signal<number | null>(null);
   readonly busy = computed(() => this.exchanges().at(-1)?.status === 'streaming');
 
   ask(question: string): void {
@@ -43,6 +45,7 @@ export class ChatSession {
     this.subscription?.unsubscribe();
     this.exchanges.update((all) => [...all, { question: text, answer: '', status: 'streaming', steps: [] }]);
     this.places.set([]);
+    this.selected.set(null);
     this.subscription = this.api.ask({ text }).subscribe({
       next: (event) => this.apply(event),
       error: (error: unknown) => this.update({ status: 'error', error: problemDetail(error) }),
