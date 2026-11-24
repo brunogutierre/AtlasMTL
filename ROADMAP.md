@@ -70,6 +70,10 @@ See [ADR 0004](docs/adr/0004-one-feature-table-explicit-sql.md).
 
 ## 3. Step by step
 
+### Status
+
+✅ done · 🟡 partly done. Steps 1–19 and 21 are built and tested (PRs #1–#28).
+
 ### M0: Discovery
 0. ✅ **Data spike**, done 2026-11-20: see [docs/data-spike.md](docs/data-spike.md). For each dataset, confirm the license (expected CC-BY 4.0, which requires attribution), CRS, update cadence, FR/EN fields and coordinates:
    - parks
@@ -83,32 +87,32 @@ See [ADR 0004](docs/adr/0004-one-feature-table-explicit-sql.md).
 2. `chore`: monorepo scaffold (Spring Boot 4, Angular 22, Compose with PostGIS, CI)
 
 ### M1: Data
-3. `feat(db)`: schema migrations plus Testcontainers
-4. `feat(ingest)`: dataset readers and normalizer (categories, `name_fr`/`name_en`)
-5. `feat(ingest)`: loader, runner and weekly cron workflow
+3. ✅ `feat(db)`: schema migrations plus Testcontainers
+4. ✅ `feat(ingest)`: dataset readers and normalizer (categories, `name_fr`/`name_en`)
+5. ✅ `feat(ingest)`: loader, runner and weekly cron workflow
 
 ### M2: Agent
-6. `feat(geo)`: spatial query service
-7. `feat(geo)`: geocoder and borough lookup
-8. `feat(agent)`: tools, argument guards, result store
-9. `feat(agent)`: orchestration plus SSE `AgentEvent` stream (stub-LLM tests)
-10. `chore(api)`: RecordBridge generation wired into the build (its Gradle plugin)
+6. ✅ `feat(geo)`: spatial query service
+7. ✅ `feat(geo)`: geocoder and borough lookup
+8. ✅ `feat(agent)`: tools, argument guards, result store
+9. ✅ `feat(agent)`: orchestration plus SSE `AgentEvent` stream (stub-LLM tests)
+10. ✅ `chore(api)`: RecordBridge generation wired into the build (its Gradle plugin)
 
 ### M3: Web
-11. `feat(web)`: app shell, Tessera theme, EN/FR
-12. `feat(web)`: MapLibre map, GeoJSON and borough layers
-13. `feat(web)`: streaming chat panel
-14. `feat(web)`: tool-call trace panel, plus a result list synced with the map
-15. `feat(web)`: example question gallery
+11. ✅ `feat(web)`: app shell, Tessera theme, EN/FR
+12. ✅ `feat(web)`: MapLibre map, GeoJSON and borough layers
+13. ✅ `feat(web)`: streaming chat panel
+14. ✅ `feat(web)`: tool-call trace panel, plus a result list synced with the map
+15. ✅ `feat(web)`: example question gallery
 
 ### M4: Production
-16. `feat(api)`: rate limits and token budgets
-17. `feat(api)`: cached example replay
-18. `feat(obs)`: usage log, metrics, `/stats` page
-19. `test(evals)`: golden-question suite plus report
-20. `chore(deploy)`: Dockerfile, Render, Neon, CD
-21. `test(e2e)`: Playwright plus axe
-22. `docs`: final README, architecture diagram, demo GIF
+16. ✅ `feat(api)`: rate limits and token budgets
+17. ✅ `feat(api)`: cached example replay
+18. ✅ `feat(obs)`: usage log, metrics, `/stats` page
+19. ✅ `test(evals)`: golden-question suite plus report
+20. 🟡 `chore(deploy)`: Dockerfile, Render, Neon, CD. The container is done (#28); the Render service and the Neon database need the owner's accounts
+21. ✅ `test(e2e)`: Playwright plus axe
+22. 🟡 `docs`: final README, architecture diagram, demo GIF. README and diagram are done; the demo GIF and the live link wait for the deploy
 
 ## 4. Extras
 
