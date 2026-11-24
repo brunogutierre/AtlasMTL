@@ -126,6 +126,7 @@ class AnthropicContractTest {
       assertThat(body.get("tools")).hasSize(6);
       assertThat(body.get("model").asString()).isEqualTo("claude-haiku-5-5");
       assertThat(body.get("max_tokens").asInt()).isEqualTo(1024);
+      assertThat(body.has("temperature")).as("Claude Haiku 5.5 rejects temperature").isFalse();
     }
   }
 

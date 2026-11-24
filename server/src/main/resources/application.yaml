@@ -33,7 +33,7 @@ spring:
         options:
           model: ${ATLAS_MODEL:claude-haiku-5-5}
           max-tokens: 1024
-          temperature: 0.2
+          # No temperature: Claude Haiku 5.5 rejects it ("temperature is deprecated for this model").
 
 server:
   # Hosts such as Render pass the port to listen on in PORT.
