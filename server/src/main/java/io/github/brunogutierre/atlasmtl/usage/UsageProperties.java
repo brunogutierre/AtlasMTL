@@ -15,8 +15,9 @@ public record UsageProperties(
     BigDecimal inputUsdPerMillion, BigDecimal outputUsdPerMillion, String visitorKey) {
 
   public UsageProperties {
-    inputUsdPerMillion = inputUsdPerMillion == null ? BigDecimal.ONE : inputUsdPerMillion;
-    outputUsdPerMillion = outputUsdPerMillion == null ? BigDecimal.valueOf(5) : outputUsdPerMillion;
+    inputUsdPerMillion = inputUsdPerMillion == null ? new BigDecimal("0.10") : inputUsdPerMillion;
+    outputUsdPerMillion =
+        outputUsdPerMillion == null ? new BigDecimal("0.50") : outputUsdPerMillion;
     visitorKey = visitorKey == null ? "" : visitorKey;
   }
 

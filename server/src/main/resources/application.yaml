@@ -50,9 +50,10 @@ management:
 
 atlas:
   usage:
-    # US dollars per million tokens of the default model; check the provider's price list.
-    input-usd-per-million: ${ATLAS_INPUT_USD_PER_MILLION:1}
-    output-usd-per-million: ${ATLAS_OUTPUT_USD_PER_MILLION:5}
+    # US dollars per million tokens of the default model, Claude Haiku 5.5, for prompts up to
+    # 100,000 tokens (platform.claude.com/docs/en/about-claude/pricing, checked 2026-11-24).
+    input-usd-per-million: ${ATLAS_INPUT_USD_PER_MILLION:0.10}
+    output-usd-per-million: ${ATLAS_OUTPUT_USD_PER_MILLION:0.50}
     # Keys the visitor hashes; set it in production so ids survive restarts.
     visitor-key: ${ATLAS_VISITOR_KEY:}
   limits:
