@@ -98,7 +98,7 @@ class AnswersTest {
             .list();
     assertThat(rows)
         .containsExactly(
-            List.of("done", false, "[\"count_by_borough\"]", 200, "0.000400", "visitor-1"),
+            List.of("done", false, "[\"count_by_borough\"]", 200, "0.000040", "visitor-1"),
             List.of("done", true, "[\"count_by_borough\"]", 0, "0.000000", "visitor-1"),
             List.of("error", false, "[]", 0, "0.000000", "visitor-1"));
   }
