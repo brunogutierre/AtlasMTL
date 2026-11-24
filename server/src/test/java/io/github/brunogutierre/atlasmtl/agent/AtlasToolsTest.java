@@ -79,6 +79,18 @@ class AtlasToolsTest {
   }
 
   @Test
+  void givesTheDistanceOfPlacesFoundAroundAPoint() {
+    JsonNode result =
+        call(
+            "find_features",
+            "{\"category\": \"SCHOOL\", \"nearLongitude\": -73.586,"
+                + " \"nearLatitude\": 45.5205, \"radiusMeters\": 1000}");
+
+    assertThat(result.at("/examples/0/name").asString()).isEqualTo("École Alpha");
+    assertThat(result.at("/examples/0/meters").asInt()).isBetween(93, 99); // ~96 m
+  }
+
+  @Test
   void pairsPlacesWithTheNearestOfAnotherCategory() {
     JsonNode result =
         call(

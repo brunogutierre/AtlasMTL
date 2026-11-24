@@ -20,7 +20,7 @@ public record Golden(String id, String question, Expect expect) {
    * @param total how many places a tool should report
    * @param maxToolCalls at most this many tool calls
    * @param answerMentions words the answer text must contain
-   * @param answerLanguage "fr" when the answer must be French
+   * @param answerLanguage "fr" or "en" when the answer must be in that language only
    */
   public record Expect(
       @Nullable List<String> tools,

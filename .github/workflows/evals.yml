@@ -61,4 +61,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: eval-report
-          path: server/build/reports/evals/
+          # The test results hold the server's log, which explains failed answers.
+          path: |
+            server/build/reports/evals/
+            server/build/test-results/evals/

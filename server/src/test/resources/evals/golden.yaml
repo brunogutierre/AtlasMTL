@@ -23,13 +23,14 @@
       count_by_borough: { category: PARK }
     answerMentions: [Plateau]
 - id: parks-near-address
-  question: Parks within 500 m of 1000 rue Sherbrooke Ouest
+  question: Parks within 500 m of 1000 rue Sherbrooke Ouest, and how far is each?
   expect:
     tools: [geocode, find_features]
     arguments:
       geocode: { address: Sherbrooke }
       find_features: { category: PARK, radiusMeters: 500 }
     total: { tool: find_features, min: 1, max: 20 }
+    answerMentions: [" m"]
 - id: clsc-cdn-ndg
   question: CLSCs in Côte-des-Neiges–Notre-Dame-de-Grâce
   expect:
@@ -63,8 +64,9 @@
   question: What is the best restaurant in Montréal?
   expect:
     maxToolCalls: 1
-    answerMentions: []
+    answerLanguage: en
 - id: unsupported-category
   question: Where are the museums in the Plateau?
   expect:
     maxToolCalls: 2
+    answerLanguage: en

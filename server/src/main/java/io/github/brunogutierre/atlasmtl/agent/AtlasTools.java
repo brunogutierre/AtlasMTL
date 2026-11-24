@@ -113,12 +113,16 @@ public class AtlasTools {
       return outOfRange("limit", max, 1, GeoQueries.MAX_LIMIT);
     }
     Found<Place> found = geo.find(category, area, near, minAreaHectares, max);
+    Near nearPoint = near;
     String id = store.put("find_features", found.places());
     return new ToolResults.Places(
         id,
         found.total(),
         found.places().size(),
-        found.places().stream().limit(EXAMPLES).map(p -> brief(p, null)).toList());
+        found.places().stream()
+            .limit(EXAMPLES)
+            .map(p -> brief(p, nearPoint == null ? null : meters(nearPoint, p)))
+            .toList());
   }
 
   @Tool(
@@ -209,6 +213,22 @@ public class AtlasTools {
             new ToolResults.BoroughInfo(
                 b.name(), b.kind(), b.areaKm2(), b.longitude(), b.latitude()))
         .orElseGet(() -> unknownBorough(name));
+  }
+
+  /**
+   * The distance from the search center to a place's label point (haversine). It's close enough for
+   * a summary, and the model needs it to answer "how far".
+   */
+  static int meters(Near center, Place place) {
+    double earth = 6_371_008.8;
+    double lat1 = Math.toRadians(center.latitude());
+    double lat2 = Math.toRadians(place.latitude());
+    double dLat = lat2 - lat1;
+    double dLon = Math.toRadians(place.longitude() - center.longitude());
+    double a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return (int) Math.round(2 * earth * Math.asin(Math.sqrt(a)));
   }
 
   private static Brief brief(Place p, @Nullable Integer meters) {
