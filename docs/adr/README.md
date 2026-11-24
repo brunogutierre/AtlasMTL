@@ -11,5 +11,5 @@ Short records of decisions that are expensive to reverse. Each record states its
 | [0005](0005-ingest-as-ci-job.md) | Ingest is a separate module run weekly by GitHub Actions | Accepted |
 | [0006](0006-local-geocoder.md) | A local geocoder built from the city's address points | Accepted |
 | [0007](0007-maplibre-openfreemap.md) | MapLibre GL JS with OpenFreeMap tiles | Accepted |
-| [0008](0008-hosting-render-neon.md) | One container on Render, PostGIS on Neon | Proposed |
+| [0008](0008-hosting-render-neon.md) | One container on Render, PostGIS on Neon | Accepted |
 | [0009](0009-own-tool-loop.md) | Our own tool loop on the chat model, with per-answer limits | Accepted |
