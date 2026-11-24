@@ -2,6 +2,8 @@ package io.github.brunogutierre.atlasmtl.api;
 
 import io.github.brunogutierre.atlasmtl.agent.AgentEvent;
 import io.github.brunogutierre.atlasmtl.agent.Answers;
+import io.github.brunogutierre.atlasmtl.usage.Visitors;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -22,13 +24,16 @@ import reactor.core.publisher.Flux;
 public class AskController {
 
   private final Answers answers;
+  private final Visitors visitors;
 
-  public AskController(Answers answers) {
+  public AskController(Answers answers, Visitors visitors) {
     this.answers = answers;
+    this.visitors = visitors;
   }
 
   @PostMapping(path = "/ask", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public Flux<ServerSentEvent<AgentEvent>> ask(@RequestBody Question question) {
+  public Flux<ServerSentEvent<AgentEvent>> ask(
+      @RequestBody Question question, HttpServletRequest request) {
     String text = question.text() == null ? "" : question.text().strip();
     if (text.isEmpty()) {
       throw new InvalidQuestionException("Ask a question.");
@@ -37,7 +42,9 @@ public class AskController {
       throw new InvalidQuestionException(
           "Questions are limited to " + Question.MAX_LENGTH + " characters.");
     }
-    return answers.ask(text).map(event -> ServerSentEvent.builder(event).build());
+    return answers
+        .ask(text, visitors.id(request.getRemoteAddr()))
+        .map(event -> ServerSentEvent.builder(event).build());
   }
 
   @ExceptionHandler(InvalidQuestionException.class)

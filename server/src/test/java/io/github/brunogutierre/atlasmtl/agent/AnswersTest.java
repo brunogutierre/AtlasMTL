@@ -19,7 +19,8 @@ import org.springframework.test.context.jdbc.Sql;
 @Sql(scripts = "/geo-fixture.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 @Sql(
     statements =
-        "delete from answer_cache; delete from feature; delete from borough; delete from dataset",
+        "delete from query_log; delete from answer_cache; delete from feature; delete from borough;"
+            + " delete from dataset",
     executionPhase = Sql.ExecutionPhase.AFTER_TEST_CLASS)
 class AnswersTest {
 
@@ -30,10 +31,11 @@ class AnswersTest {
   @BeforeEach
   void emptyCache() {
     jdbc.sql("delete from answer_cache").update();
+    jdbc.sql("delete from query_log").update();
   }
 
   private List<AgentEvent> ask(String question) {
-    return answers.ask(question).collectList().block(Duration.ofSeconds(30));
+    return answers.ask(question, "visitor-1").collectList().block(Duration.ofSeconds(30));
   }
 
   @Test
@@ -67,5 +69,57 @@ class AnswersTest {
     assertThat(AnswerCache.key("Parcs à Verdun ?")).isEqualTo("parcs a verdun");
     assertThat(AnswerCache.key("Which borough has the most parks per km²?"))
         .isEqualTo("which borough has the most parks per km2");
+  }
+
+  @Test
+  void logsEveryAnswerWithItsToolsCostAndOutcome() throws InterruptedException {
+    model.play(
+        Turn.call("count_by_borough", "{\"category\": \"PARK\"}"), Turn.text("Plateau leads."));
+
+    ask("Parks per borough?");
+    ask("parks per borough");
+    model.play();
+    model.failure = new IllegalStateException("down");
+    ask("Something else");
+    awaitRows(3); // doFinally logs after the subscriber already saw the end of the stream
+
+    var rows =
+        jdbc.sql(
+                "select outcome, cached, tools::text, input_tokens, cost_usd::text, visitor"
+                    + " from query_log order by id")
+            .query((rs, i) ->
+                List.of(
+                    rs.getString(1),
+                    rs.getBoolean(2),
+                    rs.getString(3),
+                    rs.getInt(4),
+                    rs.getString(5),
+                    rs.getString(6)))
+            .list();
+    assertThat(rows)
+        .containsExactly(
+            List.of("done", false, "[\"count_by_borough\"]", 200, "0.000400", "visitor-1"),
+            List.of("done", true, "[\"count_by_borough\"]", 0, "0.000000", "visitor-1"),
+            List.of("error", false, "[]", 0, "0.000000", "visitor-1"));
+  }
+
+  @Test
+  void logsAnAnswerTheVisitorLeft() throws InterruptedException {
+    model.play(Turn.text("A long", " answer"));
+
+    answers.ask("Leave early", "visitor-2").take(1).blockLast(Duration.ofSeconds(10));
+    awaitRows(1);
+
+    assertThat(jdbc.sql("select outcome from query_log").query(String.class).single())
+        .isEqualTo("cancelled");
+  }
+
+  private void awaitRows(long expected) throws InterruptedException {
+    for (int i = 0; i < 50; i++) {
+      if (jdbc.sql("select count(*) from query_log").query(Long.class).single() >= expected) {
+        return;
+      }
+      Thread.sleep(50);
+    }
   }
 }
