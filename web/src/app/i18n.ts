@@ -21,6 +21,16 @@ const en = {
     failed: 'The assistant couldn’t answer. Please try again.',
   },
   map: { label: 'Map of the answer' },
+  examples: {
+    heading: 'Try one of these',
+    questions: [
+      'Schools within 1 km of a hospital',
+      'Parks larger than 2 hectares in Rosemont–La Petite-Patrie',
+      'Which borough has the most parks per km²?',
+      'Parks within 500 m of 1000 rue Sherbrooke Ouest',
+      'CLSCs in Côte-des-Neiges–Notre-Dame-de-Grâce',
+    ],
+  },
   trace: {
     summary: (steps: number) => `How I found it (${steps} ${steps === 1 ? 'step' : 'steps'})`,
     found: (total: number) => `${total} found`,
@@ -65,6 +75,16 @@ const fr: Messages = {
     failed: 'L’assistant n’a pas pu répondre. Veuillez réessayer.',
   },
   map: { label: 'Carte de la réponse' },
+  examples: {
+    heading: 'Essayez une de ces questions',
+    questions: [
+      'Écoles à moins de 1 km d’un hôpital',
+      'Parcs de plus de 2 hectares dans Rosemont–La Petite-Patrie',
+      'Quel arrondissement compte le plus de parcs par km² ?',
+      'Parcs à moins de 500 m du 1000 rue Sherbrooke Ouest',
+      'CLSC dans Côte-des-Neiges–Notre-Dame-de-Grâce',
+    ],
+  },
   trace: {
     summary: (steps: number) => `Comment je l’ai trouvé (${steps} étape${steps === 1 ? '' : 's'})`,
     found: (total: number) => `${total} trouvé${total === 1 ? '' : 's'}`,

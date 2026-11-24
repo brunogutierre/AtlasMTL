@@ -33,7 +33,19 @@
       }
     </li>
   } @empty {
-    <li class="empty">{{ i18n.t().chat.empty }}</li>
+    <li class="empty">
+      <p>{{ i18n.t().chat.empty }}</p>
+      <h3 id="examples-heading">{{ i18n.t().examples.heading }}</h3>
+      <ul class="examples" aria-labelledby="examples-heading">
+        @for (question of i18n.t().examples.questions; track question) {
+          <li>
+            <button type="button" class="example" (click)="session.ask(question)">
+              {{ question }}
+            </button>
+          </li>
+        }
+      </ul>
+    </li>
   }
 </ol>
 
