@@ -18,6 +18,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation(testFixtures(project(":db")))
+    testImplementation("tools.jackson.dataformat:jackson-dataformat-yaml")
 }
 
 // Generates the Angular API client and event types from the compiled controllers with
@@ -26,4 +27,29 @@ recordBridge {
     basePackages = listOf("io.github.brunogutierre.atlasmtl.api")
     outputDir = rootProject.file("web/src/app/api")
     unmarkedNullness = "NON_NULL"
+}
+
+// The eval suite asks the real model (costs tokens), so it only runs on demand:
+// ANTHROPIC_API_KEY=… DATABASE_URL=… ./gradlew :server:evals
+tasks.test {
+    useJUnitPlatform { excludeTags("live") }
+}
+
+val evals by tasks.registering(Test::class) {
+    group = "verification"
+    description = "Asks the golden questions to the real model and writes build/reports/evals."
+    testClassesDirs =
+        sourceSets.test
+            .get()
+            .output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform { includeTags("live") }
+    outputs.upToDateWhen { false }
+    systemProperty(
+        "evals.reports",
+        layout.buildDirectory
+            .dir("reports/evals")
+            .get()
+            .asFile.absolutePath,
+    )
 }
