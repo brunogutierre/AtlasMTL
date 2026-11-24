@@ -1,0 +1,54 @@
+<div class="page">
+  <h2>{{ i18n.t().stats.title }}</h2>
+  <p class="intro">{{ i18n.t().stats.intro }}</p>
+
+  @if (stats.isLoading() && !stats.hasValue()) {
+    <tes-spinner [label]="i18n.t().stats.title" />
+  } @else if (stats.error()) {
+    <tes-alert tone="danger">{{ i18n.t().stats.failed }}</tes-alert>
+  } @else if (stats.hasValue()) {
+    @let s = stats.value();
+    @if (s.questions === 0) {
+      <p>{{ i18n.t().stats.empty }}</p>
+    } @else {
+      <div class="figures">
+        <tes-stat [label]="i18n.t().stats.questions" [value]="number(s.questions)" />
+        <tes-stat [label]="i18n.t().stats.week" [value]="number(s.lastSevenDays)" />
+        <tes-stat [label]="i18n.t().stats.cached" [value]="percent(s.cachedShare)" />
+        <tes-stat [label]="i18n.t().stats.cost" [value]="usd(s.averageCostUsd)" />
+        <tes-stat [label]="i18n.t().stats.median" [value]="seconds(s.medianLatencyMs)" />
+        <tes-stat [label]="i18n.t().stats.p95" [value]="seconds(s.p95LatencyMs)" />
+        <tes-stat [label]="i18n.t().stats.toolCalls" [value]="number(s.averageToolCalls, 1)" />
+      </div>
+
+      <div class="panels">
+        <section tes-card aria-labelledby="days-heading">
+          <h3 id="days-heading">{{ i18n.t().stats.days }}</h3>
+          <ol class="days">
+            @for (d of s.days; track d.day) {
+              <li>
+                <span class="label">{{ day(d.day) }}</span>{{ ' ' }}
+                <span class="bar" aria-hidden="true">
+                  <span [style.width.%]="(d.questions / busiest()) * 100"></span>
+                </span>{{ ' ' }}
+                <span class="count">{{ number(d.questions) }}</span>
+              </li>
+            }
+          </ol>
+        </section>
+
+        <section tes-card aria-labelledby="tools-heading">
+          <h3 id="tools-heading">{{ i18n.t().stats.tools }}</h3>
+          <ol class="tools">
+            @for (t of s.tools; track t.tool) {
+              <li>
+                <span>{{ tool(t.tool) }}</span>{{ ' ' }}
+                <span class="count">{{ number(t.calls) }}</span>
+              </li>
+            }
+          </ol>
+        </section>
+      </div>
+    }
+  }
+</div>
