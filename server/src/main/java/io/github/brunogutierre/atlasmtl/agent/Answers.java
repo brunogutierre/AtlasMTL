@@ -1,5 +1,6 @@
 package io.github.brunogutierre.atlasmtl.agent;
 
+import io.github.brunogutierre.atlasmtl.usage.Limits;
 import io.github.brunogutierre.atlasmtl.usage.QueryLog;
 import io.github.brunogutierre.atlasmtl.usage.UsageProperties;
 import java.util.ArrayList;
@@ -23,22 +24,30 @@ public class Answers {
   private final AnswerCache cache;
   private final QueryLog queryLog;
   private final UsageProperties prices;
+  private final Limits limits;
 
-  public Answers(Agent agent, AnswerCache cache, QueryLog queryLog, UsageProperties prices) {
+  public Answers(
+      Agent agent, AnswerCache cache, QueryLog queryLog, UsageProperties prices, Limits limits) {
     this.agent = agent;
     this.cache = cache;
     this.queryLog = queryLog;
     this.prices = prices;
+    this.limits = limits;
   }
 
   /**
    * The answer's events.
    *
    * @param visitor the pseudonymous visitor id, for the log and the budgets
+   * @throws io.github.brunogutierre.atlasmtl.usage.LimitExceeded when an answer would need the
+   *     model and a budget is spent; cached answers are always served
    */
   public Flux<AgentEvent> ask(String question, String visitor) {
     long started = System.nanoTime();
     var cached = cache.get(question);
+    if (cached.isEmpty()) {
+      limits.checkBudgets(visitor);
+    }
     var events = new ArrayList<AgentEvent>();
     Flux<AgentEvent> answer =
         cached.isPresent() ? Flux.fromIterable(replay(cached.get())) : live(question, events);

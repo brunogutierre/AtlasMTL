@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideTessera } from '@brunogutierre/tessera';
 import { Subject } from 'rxjs';
@@ -64,6 +65,20 @@ describe('ChatPanel', () => {
     await fixture.whenStable();
 
     expect(element.querySelector('tes-alert')?.textContent).toContain('The assistant couldn’t answer. Please try again.');
+  });
+
+  it('shows a reached limit in the visitor’s language', async () => {
+    TestBed.inject(I18n).language.set('fr');
+    const fixture = TestBed.createComponent(ChatPanel);
+    TestBed.inject(ChatSession).ask('Encore ?');
+    stream.error(
+      new HttpErrorResponse({ status: 429, error: JSON.stringify({ code: 'global_budget' }) }),
+    );
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('tes-alert')?.textContent).toContain(
+      'budget du jour',
+    );
   });
 
   it('explains each step and lists the places to pick on the map', async () => {
