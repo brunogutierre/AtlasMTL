@@ -48,7 +48,7 @@ public class AskController {
       throw new InvalidQuestionException(
           "Questions are limited to " + Question.MAX_LENGTH + " characters.");
     }
-    String visitor = visitors.id(request.getRemoteAddr());
+    String visitor = visitors.id(request);
     limits.checkRate(visitor);
     return answers.ask(text, visitor).map(event -> ServerSentEvent.builder(event).build());
   }

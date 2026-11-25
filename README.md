@@ -157,7 +157,7 @@ docker run -p 8080:8080 \
   -e ANTHROPIC_API_KEY=… -e ATLAS_VISITOR_KEY=… atlasmtl
 ```
 
-The server trusts `X-Forwarded-For` only from proxies on private networks (`server.forward-headers-strategy: native`), so the rate limits see each visitor's real address behind the hosting proxy.
+Visitor ids, which the rate limits and budgets use, come from the connection's address, or from `X-Forwarded-For` when the proxy is on a private network (`server.forward-headers-strategy: native`). Render sits behind Cloudflare, whose public edge address ends that chain and is shared by many visitors, so `render.yaml` sets `ATLAS_CLIENT_IP_HEADER=CF-Connecting-IP`: a header Cloudflare overwrites with the visitor's address. Leave it empty anywhere else, or visitors could choose their own address.
 
 ### Layout
 

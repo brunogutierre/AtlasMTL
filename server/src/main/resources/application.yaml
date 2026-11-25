@@ -39,7 +39,8 @@ server:
   # Hosts such as Render pass the port to listen on in PORT.
   port: ${PORT:8080}
   # Behind a proxy, take the client address from X-Forwarded-For, trusting only proxies on private
-  # networks (Tomcat's default internal proxies). The rate limits and budgets depend on it.
+  # networks (Tomcat's default internal proxies). Behind Cloudflare that stops at a shared edge
+  # address, so atlas.usage.client-ip-header takes precedence for visitor ids.
   forward-headers-strategy: native
 
 management:
@@ -56,6 +57,9 @@ atlas:
     output-usd-per-million: ${ATLAS_OUTPUT_USD_PER_MILLION:0.50}
     # Keys the visitor hashes; set it in production so ids survive restarts.
     visitor-key: ${ATLAS_VISITOR_KEY:}
+    # A header the edge proxy overwrites with the visitor's address (CF-Connecting-IP behind
+    # Cloudflare, as on Render). Empty: the connection's address. Never set it without such a proxy.
+    client-ip-header: ${ATLAS_CLIENT_IP_HEADER:}
   limits:
     questions-per-minute: ${ATLAS_QUESTIONS_PER_MINUTE:5}
     visitor-daily-tokens: ${ATLAS_VISITOR_DAILY_TOKENS:60000}
