@@ -25,6 +25,10 @@ services:
         sync: false
       - key: ATLAS_VISITOR_KEY
         generateValue: true
+      # Render sits behind Cloudflare, which overwrites this header with the visitor's address.
+      # X-Forwarded-For alone ends at a shared Cloudflare edge address (see Visitors.java).
+      - key: ATLAS_CLIENT_IP_HEADER
+        value: CF-Connecting-IP
       # Small footprint for the free instance's 0.1 CPU: serial GC, smaller thread stacks and code
       # cache, and C1 only, which starts faster. The heap size stays in the Dockerfile.
       - key: JAVA_TOOL_OPTIONS

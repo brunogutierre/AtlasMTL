@@ -21,6 +21,9 @@ The demo should answer quickly and cost as little as possible: ideally nothing w
   isn't possible here, because the same sleeping container serves the page.
 - JVM flags in `render.yaml` (serial GC, C1 only, smaller stacks and code cache) shorten that start on
   0.1 CPU and fit 512 MB.
+- Render sits behind Cloudflare. `X-Forwarded-For` ends with a public Cloudflare edge address that
+  Tomcat doesn't trust, and many visitors share it. Visitor ids come from `CF-Connecting-IP` instead,
+  which Cloudflare overwrites with the visitor's address (`ATLAS_CLIENT_IP_HEADER` in `render.yaml`).
 - Usage limits survive the sleep: daily budgets are summed from `query_log` in the database, not kept
   in memory. Only the per-minute rate buckets reset, which is harmless.
 

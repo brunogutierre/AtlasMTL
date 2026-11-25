@@ -46,7 +46,7 @@ class UsageStatsTest {
 
   @Test
   void costsFollowTheConfiguredPrices() {
-    var prices = new UsageProperties(new BigDecimal("1"), new BigDecimal("5"), "");
+    var prices = new UsageProperties(new BigDecimal("1"), new BigDecimal("5"), "", "");
 
     assertThat(prices.cost(1_000_000, 100_000)).isEqualByComparingTo("1.5");
   }
