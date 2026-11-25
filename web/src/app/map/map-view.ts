@@ -15,13 +15,20 @@ import { TesseraTheme } from '@brunogutierre/tessera';
 import type { BoroughShape, Place } from '../api';
 import { MONTREAL, boroughsCollection, bounds, placesCollection } from './map-data';
 import { MAP_ENGINE, type MapHandle } from './map-engine';
+import { PALETTES, type Basemap } from './map-style';
 
 const STYLES = {
   light: 'https://tiles.openfreemap.org/styles/positron',
   dark: 'https://tiles.openfreemap.org/styles/dark',
 };
 
-/** The answer's places over the borough outlines, in the current theme's colors. */
+/**
+ * The page background in light mode, so roads (white) stand out from the land; the card surface in
+ * dark mode, a step lighter than the page, so the map doesn't read as a black hole.
+ */
+const LAND_TOKENS = { light: '--tes-color-bg', dark: '--tes-color-surface' };
+
+/** The answer's places over the borough outlines, on a softly tinted base map in the theme's colors. */
 @Component({
   selector: 'app-map-view',
   template: '',
@@ -39,17 +46,27 @@ export class MapView {
   private readonly engine = inject(MAP_ENGINE);
   private readonly theme = inject(TesseraTheme);
   private readonly map = signal<MapHandle | null>(null);
-  private readonly style = computed(() => STYLES[this.theme.resolvedMode()]);
+  /** The base map for the current mode, its land painted in a theme color. */
+  private readonly basemap = computed<Basemap>(() => {
+    const mode = this.theme.resolvedMode();
+    return {
+      url: STYLES[mode],
+      palette: {
+        ...PALETTES[mode],
+        land: tokenColor(this.host.nativeElement, LAND_TOKENS[mode]),
+      },
+    };
+  });
 
   constructor() {
     afterNextRender(() => {
-      const map = this.engine(this.host.nativeElement, this.style());
+      const map = this.engine(this.host.nativeElement, this.basemap());
       map.onSelect((id) => this.selectedChange.emit(id));
       this.map.set(map);
     });
     inject(DestroyRef).onDestroy(() => this.map()?.destroy());
 
-    effect(() => this.map()?.setStyle(this.style()));
+    effect(() => this.map()?.setStyle(this.basemap()));
     effect(() => {
       const map = this.map();
       this.theme.resolvedMode(); // colors follow the theme
