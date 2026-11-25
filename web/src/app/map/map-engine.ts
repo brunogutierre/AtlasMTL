@@ -1,12 +1,14 @@
 import { InjectionToken } from '@angular/core';
 import type { FeatureCollection } from './map-data';
+import { shadeStyle, type Basemap } from './map-style';
 
 /** What the map view needs from a map library; MapLibre in the app, a fake in tests. */
 export interface MapHandle {
   /** Draws the outlines and the answer's places, in the given colors. */
   show(layers: MapLayers): void;
   fit(bounds: [[number, number], [number, number]]): void;
-  setStyle(url: string): void;
+  /** Loads another base map, such as the dark one when the theme changes. */
+  setStyle(basemap: Basemap): void;
   /** Highlights one place (or none) and, with a center, brings it into view. */
   select(id: number | null, center?: [number, number]): void;
   /** Called with the place clicked on the map. */
@@ -20,14 +22,14 @@ export interface MapLayers {
   colors: { places: string; outline: string; boroughs: string };
 }
 
-export type MapEngine = (container: HTMLElement, styleUrl: string) => MapHandle;
+export type MapEngine = (container: HTMLElement, basemap: Basemap) => MapHandle;
 
 /** Loads MapLibre only when a map is created, so it stays out of the initial bundle. */
 export const MAP_ENGINE = new InjectionToken<MapEngine>('MAP_ENGINE', {
-  factory: () => (container, styleUrl) => createMapLibre(container, styleUrl),
+  factory: () => (container, basemap) => createMapLibre(container, basemap),
 });
 
-function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
+function createMapLibre(container: HTMLElement, basemap: Basemap): MapHandle {
   let pending: MapLayers | null = null;
   let map: import('maplibre-gl').Map | null = null;
   let destroyed = false;
@@ -35,7 +37,10 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
   let styleReady = false;
   // A fit asked for before MapLibre finished loading is applied once the map exists.
   let pendingFit: [[number, number], [number, number]] | null = null;
-  let currentStyle = styleUrl;
+  let current = basemap;
+  // Repaints the fetched style before MapLibre commits it, so the grey base never flashes.
+  const transformStyle = (_: unknown, next: import('maplibre-gl').StyleSpecification) =>
+    shadeStyle(next, current.palette);
   let selected: number | null = null;
   let selectListener: ((id: number) => void) | null = null;
 
@@ -59,7 +64,7 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
         id: 'boroughs-line',
         type: 'line',
         source: 'boroughs',
-        paint: { 'line-width': 1, 'line-opacity': 0.5 },
+        paint: { 'line-width': 1.25, 'line-opacity': 0.7 },
       });
       map.addLayer({
         id: 'places-fill',
@@ -96,7 +101,12 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
     }
     // MapLibre 6 runs its worker from a separate file, copied to the site root by angular.json.
     setWorkerUrl(new URL('maplibre-gl-worker.mjs', container.ownerDocument.baseURI).href);
-    map = new Map({ container, style: currentStyle, bounds: pendingFit ?? [-73.98, 45.41, -73.47, 45.7] });
+    map = new Map({
+      container,
+      style: current.url,
+      transformStyle,
+      bounds: pendingFit ?? [-73.98, 45.41, -73.47, 45.7],
+    });
     // A new style drops every source and layer, so they are added again after each load.
     for (const layer of ['places-point', 'places-fill']) {
       map.on('click', layer, (event) => {
@@ -128,15 +138,16 @@ function createMapLibre(container: HTMLElement, styleUrl: string): MapHandle {
         pendingFit = bounds;
       }
     },
-    setStyle(url) {
+    setStyle(next) {
       // Setting the same style again fires no 'style.load', which would leave the layers off.
-      if (url === currentStyle) {
+      if (next.url === current.url && next.palette.land === current.palette.land) {
         return;
       }
-      currentStyle = url;
+      current = next;
       if (map) {
         styleReady = false;
-        map.setStyle(url);
+        // diff: false reloads the style, so transformStyle sees the original colors again.
+        map.setStyle(next.url, { diff: false, transformStyle });
       }
     },
     select(id, center) {
